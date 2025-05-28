@@ -7,6 +7,7 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { AdminModule } from './admin/admin.module';
 import config from './config';
 import { Admin } from './admin/models/admin.model';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -22,10 +23,14 @@ import { Admin } from './admin/models/admin.model';
       autoLoadModels: true,
       models: [Admin]
     }),
+    JwtModule.register({
+      global: true
+    }),
     UsersModule,
     ProductsModule,
     CategoriesModule,
     ReviewsModule,
-    AdminModule]
+    AdminModule
+  ]
 })
 export class AppModule { }

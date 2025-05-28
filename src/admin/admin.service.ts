@@ -1,53 +1,38 @@
-import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import { Admin } from './models/admin.model';
-import { hashPassword } from 'src/utils/bcrypt';
+import { comparePassword, hashPassword } from 'src/utils/bcrypt';
 import { AdminRoles } from 'src/enum';
+import config from 'src/config';
+import { catchError } from 'src/utils/catch-error';
+import { SignInAdminDto } from './dto/sign-in-admin.dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
-export class AdminService {
+export class AdminService implements OnModuleInit {
   constructor(
-    @InjectModel(Admin) private model: typeof Admin
+    @InjectModel(Admin) private model: typeof Admin,
+    private readonly jwtService: JwtService
   ) { }
 
-  async createSuperAdmin(createAdminDto: CreateAdminDto): Promise<object> {
+  async onModuleInit(): Promise<void> {
     try {
-      const existingSuperAdmin = await this.model.findOne({ where: { role: "superadmin" } });
+      const existingSuperAdmin = await this.model.findOne({ where: { role: AdminRoles.SUPERADMIN } });
 
-      if (existingSuperAdmin) {
-        throw new ConflictException("Super admin already exists");
-      }
-
-      const { email, phone_number, password, } = createAdminDto;
-      const existingEmail = await this.model.findOne({ where: { email } });
-
-      if (existingEmail) {
-        throw new ConflictException(`Email: ${email} already exists`);
-      }
-
-      const existingPhoneNumber = await this.model.findOne({ where: { phone_number } });
-
-      if (existingPhoneNumber) {
-        throw new ConflictException(`Phone number: ${phone_number} already exists`);
-      }
-
-      const hashed_password = await hashPassword(password);
-      const superAdmin = await this.model.create({
-        ...createAdminDto,
-        hashed_password,
-        role: AdminRoles.SUPERADMIN,
-        attributes: { exclude: ["hashed_password"] }
-      });
-
-      return {
-        statusCode: 201,
-        message: "success",
-        data: superAdmin
+      if (!existingSuperAdmin) {
+        const hashedPassword = await hashPassword(config.ADMIN_PASSWORD);
+        await this.model.create({
+          full_name: config.ADMIN_FULL_NAME,
+          email: config.ADMIN_EMAIL,
+          phone_number: config.ADMIN_PHONE,
+          hashed_password: hashedPassword,
+          role: AdminRoles.SUPERADMIN
+        });
       }
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      return catchError(error);
     }
   }
 
@@ -66,10 +51,10 @@ export class AdminService {
         throw new ConflictException(`Phone number: ${phone_number} already exists`);
       }
 
-      const hashed_password = await hashPassword(password);
+      const hashedPassword = await hashPassword(password);
       const admin = await this.model.create({
         ...createAdminDto,
-        hashed_password,
+        hashed_password: hashedPassword,
         attributes: { exclude: ["hashed_password"] }
       });
 
@@ -79,7 +64,32 @@ export class AdminService {
         data: admin
       }
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      return catchError(error);
+    }
+  }
+
+  async signIn(signInAdminDto: SignInAdminDto) {
+    try {
+      const { email, password } = signInAdminDto;
+      const admin = await this.model.findOne({ where: { email } });
+
+      if (!admin) {
+        throw new BadRequestException("Invalid email or password");
+      }
+
+      const isMatchPassword = await comparePassword(password, admin.hashed_password);
+
+      if (!isMatchPassword) {
+        throw new BadRequestException("Invalid email or password");
+      }
+
+      const payload = {
+        id: admin.id,
+        role: admin.role,
+        status: admin.status
+      }
+    } catch (error) {
+      return catchError(error);
     }
   }
 
@@ -87,7 +97,7 @@ export class AdminService {
     try {
       return this.model.findAll({ where: { role: ["admin", "superadmin"] }, attributes: { exclude: ["hashed_password"] } });
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      return catchError(error);
     }
   }
 
@@ -105,7 +115,7 @@ export class AdminService {
         data: admin
       }
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      return catchError(error);
     }
   }
 
@@ -136,7 +146,7 @@ export class AdminService {
         data: updatedAdmin
       }
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      return catchError(error);
     }
   }
 
@@ -160,7 +170,7 @@ export class AdminService {
         data: {}
       }
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      return catchError(error);
     }
   }
 }

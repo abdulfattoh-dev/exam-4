@@ -45,12 +45,40 @@ export class UsersService {
     }
   }
 
-  createCustomer(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  async createCustomer(createUserDto: CreateUserDto) {
+    try {
+      const { email, phone_number, password, } = createUserDto;
+      const existingEmail = await this.model.findOne({ where: { email } });
+
+      if (existingEmail) {
+        throw new ConflictException(`Email: ${email} already exists`);
+      }
+
+      const existingPhoneNumber = await this.model.findOne({ where: { phone_number } });
+
+      if (existingPhoneNumber) {
+        throw new ConflictException(`Phone number: ${phone_number} already exists`);
+      }
+
+      const hashed_password = await hashPassword(password);
+      const customer = await this.model.create({
+        ...createUserDto,
+        hashed_password,
+        attributes: { exclude: ["hashed_password"] }
+      });
+
+      return {
+        statusCode: 201,
+        message: "success",
+        data: customer
+      }
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
   }
 
   findAll() {
-    return `This action returns all users`;
+    return this.model.findAll({ attributes: { exclude: ["hashed_password"] } });
   }
 
   findOne(id: number) {

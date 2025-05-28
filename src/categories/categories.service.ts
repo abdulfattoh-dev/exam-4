@@ -1,26 +1,36 @@
 import { Injectable } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { InjectModel } from '@nestjs/sequelize';
+import { Category } from './models/category.model';
 
 @Injectable()
 export class CategoriesService {
-  create(createCategoryDto: CreateCategoryDto) {
-    return 'This action adds a new category';
+  constructor(@InjectModel(Category) private categoryModel: typeof Category) {}
+  async create(createCategoryDto: CreateCategoryDto) {
+    {
+      const newCategory = await this.categoryModel.create({ ...createCategoryDto });
+      return newCategory;
+    }
   }
 
-  findAll() {
-    return `This action returns all categories`;
+  async findAll() {
+    const categories = await this.categoryModel.findAll();
+    return categories
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} category`;
+  async findOne(id: number) {
+    const categories =await this.categoryModel.findByPk(id);
+    return categories
   }
 
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return `This action updates a #${id} category`;
+  async update(id: number, updateCategoryDto: UpdateCategoryDto) {
+    const category = await this.categoryModel.update(updateCategoryDto, {where:{id}, returning: true});
+    return category
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} category`;
+  async remove(id: number) {
+    await this.categoryModel.destroy({where: {id}});
+    return {data: {}};
   }
 }

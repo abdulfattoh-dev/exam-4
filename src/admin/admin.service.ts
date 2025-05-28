@@ -1,4 +1,9 @@
-import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { InjectModel } from '@nestjs/sequelize';
@@ -8,29 +13,33 @@ import { AdminRoles } from 'src/enum';
 
 @Injectable()
 export class AdminService {
-  constructor(
-    @InjectModel(Admin) private model: typeof Admin
-  ) { }
+  constructor(@InjectModel(Admin) private model: typeof Admin) {}
 
   async createSuperAdmin(createAdminDto: CreateAdminDto): Promise<object> {
     try {
-      const existingSuperAdmin = await this.model.findOne({ where: { role: "superadmin" } });
+      const existingSuperAdmin = await this.model.findOne({
+        where: { role: 'superadmin' },
+      });
 
       if (existingSuperAdmin) {
-        throw new ConflictException("Super admin already exists");
+        throw new ConflictException('Super admin already exists');
       }
 
-      const { email, phone_number, password, } = createAdminDto;
+      const { email, phone_number, password } = createAdminDto;
       const existingEmail = await this.model.findOne({ where: { email } });
 
       if (existingEmail) {
         throw new ConflictException(`Email: ${email} already exists`);
       }
 
-      const existingPhoneNumber = await this.model.findOne({ where: { phone_number } });
+      const existingPhoneNumber = await this.model.findOne({
+        where: { phone_number },
+      });
 
       if (existingPhoneNumber) {
-        throw new ConflictException(`Phone number: ${phone_number} already exists`);
+        throw new ConflictException(
+          `Phone number: ${phone_number} already exists`,
+        );
       }
 
       const hashed_password = await hashPassword(password);
@@ -38,14 +47,14 @@ export class AdminService {
         ...createAdminDto,
         hashed_password,
         role: AdminRoles.SUPERADMIN,
-        attributes: { exclude: ["hashed_password"] }
+        attributes: { exclude: ['hashed_password'] },
       });
 
       return {
         statusCode: 201,
-        message: "success",
-        data: superAdmin
-      }
+        message: 'success',
+        data: superAdmin,
+      };
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
@@ -53,31 +62,35 @@ export class AdminService {
 
   async create(createAdminDto: CreateAdminDto) {
     try {
-      const { email, phone_number, password, } = createAdminDto;
+      const { email, phone_number, password } = createAdminDto;
       const existingEmail = await this.model.findOne({ where: { email } });
 
       if (existingEmail) {
         throw new ConflictException(`Email: ${email} already exists`);
       }
 
-      const existingPhoneNumber = await this.model.findOne({ where: { phone_number } });
+      const existingPhoneNumber = await this.model.findOne({
+        where: { phone_number },
+      });
 
       if (existingPhoneNumber) {
-        throw new ConflictException(`Phone number: ${phone_number} already exists`);
+        throw new ConflictException(
+          `Phone number: ${phone_number} already exists`,
+        );
       }
 
       const hashed_password = await hashPassword(password);
       const admin = await this.model.create({
         ...createAdminDto,
         hashed_password,
-        attributes: { exclude: ["hashed_password"] }
+        attributes: { exclude: ['hashed_password'] },
       });
 
       return {
         statusCode: 201,
-        message: "success",
-        data: admin
-      }
+        message: 'success',
+        data: admin,
+      };
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
@@ -85,7 +98,10 @@ export class AdminService {
 
   async findAll() {
     try {
-      return this.model.findAll({ where: { role: ["admin", "superadmin"] }, attributes: { exclude: ["hashed_password"] } });
+      return this.model.findAll({
+        where: { role: ['admin', 'superadmin'] },
+        attributes: { exclude: ['hashed_password'] },
+      });
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
@@ -93,7 +109,9 @@ export class AdminService {
 
   async findOne(id: number) {
     try {
-      const admin = await this.model.findByPk(id, { attributes: { exclude: ["hashed_password"] } });
+      const admin = await this.model.findByPk(id, {
+        attributes: { exclude: ['hashed_password'] },
+      });
 
       if (!admin) {
         throw new NotFoundException(`Admin not found by id: ${id}`);
@@ -101,9 +119,9 @@ export class AdminService {
 
       return {
         statusCode: 200,
-        message: "success",
-        data: admin
-      }
+        message: 'success',
+        data: admin,
+      };
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
@@ -123,18 +141,23 @@ export class AdminService {
         updateAdminDto.password = await hashPassword(password);
       }
 
-      await this.model.update({
-        ...updateAdminDto,
-        hashed_password: updateAdminDto.password
-      }, { where: { id } });
+      await this.model.update(
+        {
+          ...updateAdminDto,
+          hashed_password: updateAdminDto.password,
+        },
+        { where: { id } },
+      );
 
-      const updatedAdmin = await this.model.findByPk(id, { attributes: { exclude: ["hashed_password"] } });
+      const updatedAdmin = await this.model.findByPk(id, {
+        attributes: { exclude: ['hashed_password'] },
+      });
 
       return {
         statusCode: 200,
-        message: "success",
-        data: updatedAdmin
-      }
+        message: 'success',
+        data: updatedAdmin,
+      };
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
@@ -148,17 +171,17 @@ export class AdminService {
         throw new NotFoundException(`Admin not found by id: ${id}`);
       }
 
-      if (admin.role === "superadmin") {
-        throw new ConflictException("Super admin cannot be deleted");
+      if (admin.role === 'superadmin') {
+        throw new ConflictException('Super admin cannot be deleted');
       }
 
       await this.model.destroy({ where: { id } });
 
       return {
         statusCode: 200,
-        message: "success",
-        data: {}
-      }
+        message: 'success',
+        data: {},
+      };
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }

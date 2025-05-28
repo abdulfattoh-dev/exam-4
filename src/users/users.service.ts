@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/sequelize';
@@ -8,23 +12,25 @@ import { UserRoles } from 'src/enum';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    @InjectModel(User) private model: typeof User
-  ) { }
+  constructor(@InjectModel(User) private model: typeof User) {}
 
   async createSeller(createUserDto: CreateUserDto) {
     try {
-      const { email, phone_number, password, } = createUserDto;
+      const { email, phone_number, password } = createUserDto;
       const existingEmail = await this.model.findOne({ where: { email } });
 
       if (existingEmail) {
         throw new ConflictException(`Email: ${email} already exists`);
       }
 
-      const existingPhoneNumber = await this.model.findOne({ where: { phone_number } });
+      const existingPhoneNumber = await this.model.findOne({
+        where: { phone_number },
+      });
 
       if (existingPhoneNumber) {
-        throw new ConflictException(`Phone number: ${phone_number} already exists`);
+        throw new ConflictException(
+          `Phone number: ${phone_number} already exists`,
+        );
       }
 
       const hashed_password = await hashPassword(password);
@@ -32,14 +38,14 @@ export class UsersService {
         ...createUserDto,
         hashed_password,
         role: UserRoles.SELLER,
-        attributes: { exclude: ["hashed_password"] }
+        attributes: { exclude: ['hashed_password'] },
       });
 
       return {
         statusCode: 201,
-        message: "success",
-        data: seller
-      }
+        message: 'success',
+        data: seller,
+      };
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }

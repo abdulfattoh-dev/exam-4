@@ -6,12 +6,12 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { AdminModule } from './admin/admin.module';
 import config from './config';
-import { Admin } from './admin/models/admin.model';
+import { Category } from './categories/models/category.model';
 
 @Module({
   imports: [
     SequelizeModule.forRoot({
-      dialect: "postgres",
+      dialect: 'postgres',
       host: config.PG_HOST,
       port: config.PG_PORT,
       username: config.PG_USER,
@@ -20,12 +20,9 @@ import { Admin } from './admin/models/admin.model';
       synchronize: true,
       logging: false,
       autoLoadModels: true,
-      models: [Admin]
+      models: [Category],
     }),
-    UsersModule,
-    ProductsModule,
     CategoriesModule,
-    ReviewsModule,
-    AdminModule]
+  ],
 })
-export class AppModule { }
+export class AppModule {}

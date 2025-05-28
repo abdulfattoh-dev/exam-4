@@ -6,6 +6,8 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { AdminModule } from './admin/admin.module';
 import config from './config';
+import { Admin } from './admin/models/admin.model';
+import { JwtModule } from '@nestjs/jwt';
 import { Category } from './categories/models/category.model';
 
 @Module({
@@ -22,7 +24,14 @@ import { Category } from './categories/models/category.model';
       autoLoadModels: true,
       models: [Category],
     }),
+    JwtModule.register({
+      global: true
+    }),
+    UsersModule,
+    ProductsModule,
     CategoriesModule,
-  ],
+    ReviewsModule,
+    AdminModule
+  ]
 })
 export class AppModule {}

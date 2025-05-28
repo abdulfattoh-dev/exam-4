@@ -1,22 +1,39 @@
+<<<<<<< HEAD
 import {
   ConflictException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+=======
+import { BadRequestException, ConflictException, Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+>>>>>>> 39fea831b376bd16a715aa4b0ab6758ff50a4817
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import { Admin } from './models/admin.model';
-import { hashPassword } from 'src/utils/bcrypt';
+import { comparePassword, hashPassword } from 'src/utils/bcrypt';
 import { AdminRoles } from 'src/enum';
+import config from 'src/config';
+import { catchError } from 'src/utils/catch-error';
+import { SignInAdminDto } from './dto/sign-in-admin.dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
+<<<<<<< HEAD
 export class AdminService {
   constructor(@InjectModel(Admin) private model: typeof Admin) {}
+=======
+export class AdminService implements OnModuleInit {
+  constructor(
+    @InjectModel(Admin) private model: typeof Admin,
+    private readonly jwtService: JwtService
+  ) { }
+>>>>>>> 39fea831b376bd16a715aa4b0ab6758ff50a4817
 
-  async createSuperAdmin(createAdminDto: CreateAdminDto): Promise<object> {
+  async onModuleInit(): Promise<void> {
     try {
+<<<<<<< HEAD
       const existingSuperAdmin = await this.model.findOne({
         where: { role: 'superadmin' },
       });
@@ -55,8 +72,22 @@ export class AdminService {
         message: 'success',
         data: superAdmin,
       };
+=======
+      const existingSuperAdmin = await this.model.findOne({ where: { role: AdminRoles.SUPERADMIN } });
+
+      if (!existingSuperAdmin) {
+        const hashedPassword = await hashPassword(config.ADMIN_PASSWORD);
+        await this.model.create({
+          full_name: config.ADMIN_FULL_NAME,
+          email: config.ADMIN_EMAIL,
+          phone_number: config.ADMIN_PHONE,
+          hashed_password: hashedPassword,
+          role: AdminRoles.SUPERADMIN
+        });
+      }
+>>>>>>> 39fea831b376bd16a715aa4b0ab6758ff50a4817
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      return catchError(error);
     }
   }
 
@@ -79,11 +110,16 @@ export class AdminService {
         );
       }
 
-      const hashed_password = await hashPassword(password);
+      const hashedPassword = await hashPassword(password);
       const admin = await this.model.create({
         ...createAdminDto,
+<<<<<<< HEAD
         hashed_password,
         attributes: { exclude: ['hashed_password'] },
+=======
+        hashed_password: hashedPassword,
+        attributes: { exclude: ["hashed_password"] }
+>>>>>>> 39fea831b376bd16a715aa4b0ab6758ff50a4817
       });
 
       return {
@@ -92,7 +128,32 @@ export class AdminService {
         data: admin,
       };
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      return catchError(error);
+    }
+  }
+
+  async signIn(signInAdminDto: SignInAdminDto) {
+    try {
+      const { email, password } = signInAdminDto;
+      const admin = await this.model.findOne({ where: { email } });
+
+      if (!admin) {
+        throw new BadRequestException("Invalid email or password");
+      }
+
+      const isMatchPassword = await comparePassword(password, admin.hashed_password);
+
+      if (!isMatchPassword) {
+        throw new BadRequestException("Invalid email or password");
+      }
+
+      const payload = {
+        id: admin.id,
+        role: admin.role,
+        status: admin.status
+      }
+    } catch (error) {
+      return catchError(error);
     }
   }
 
@@ -103,7 +164,7 @@ export class AdminService {
         attributes: { exclude: ['hashed_password'] },
       });
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      return catchError(error);
     }
   }
 
@@ -123,7 +184,7 @@ export class AdminService {
         data: admin,
       };
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      return catchError(error);
     }
   }
 
@@ -159,7 +220,7 @@ export class AdminService {
         data: updatedAdmin,
       };
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      return catchError(error);
     }
   }
 
@@ -183,7 +244,7 @@ export class AdminService {
         data: {},
       };
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      return catchError(error);
     }
   }
 }

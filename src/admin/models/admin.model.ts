@@ -1,8 +1,8 @@
 import { Column, DataType, Model, Table } from "sequelize-typescript";
-import { Status, UserRoles } from "src/enum";
+import { AdminRoles, Status } from "src/enum";
 
-@Table({ tableName: "users" })
-export class User extends Model {
+@Table({ tableName: "admins" })
+export class Admin extends Model {
     @Column({
         type: DataType.STRING,
         allowNull: false
@@ -30,14 +30,8 @@ export class User extends Model {
     hashed_password: string;
 
     @Column({
-        type: DataType.STRING,
-        allowNull: false
-    })
-    address: string;
-
-    @Column({
-        type: DataType.ENUM(UserRoles.SELLER, UserRoles.CUSTOMER),
-        defaultValue: UserRoles.CUSTOMER
+        type: DataType.ENUM(AdminRoles.SUPERADMIN, AdminRoles.ADMIN),
+        defaultValue: AdminRoles.ADMIN
     })
     role: string;
 

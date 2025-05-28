@@ -4,7 +4,9 @@ import { ProductsModule } from './products/products.module';
 import { CategoriesModule } from './categories/categories.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { SequelizeModule } from '@nestjs/sequelize';
+import { AdminModule } from './admin/admin.module';
 import config from './config';
+import { Admin } from './admin/models/admin.model';
 
 @Module({
   imports: [
@@ -18,11 +20,12 @@ import config from './config';
       synchronize: true,
       logging: false,
       autoLoadModels: true,
-      models: []
+      models: [Admin]
     }),
     UsersModule,
     ProductsModule,
     CategoriesModule,
-    ReviewsModule]
+    ReviewsModule,
+    AdminModule]
 })
 export class AppModule { }

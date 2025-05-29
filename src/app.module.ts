@@ -23,6 +23,7 @@ import { Category } from './categories/models/category.model';
       logging: false,
       autoLoadModels: true,
       models: [Category],
+      
     }),
     JwtModule.register({
       global: true

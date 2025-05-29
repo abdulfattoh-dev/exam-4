@@ -15,14 +15,6 @@ import { UpdateAdminDto } from './dto/update-admin.dto';
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
-<<<<<<< HEAD
-  @Post('super')
-  createSuperAdmin(@Body() createAdminDto: CreateAdminDto) {
-    return this.adminService.createSuperAdmin(createAdminDto);
-  }
-
-=======
->>>>>>> 39fea831b376bd16a715aa4b0ab6758ff50a4817
   @Post()
   async create(@Body() createAdminDto: CreateAdminDto) {
     return this.adminService.create(createAdminDto);

@@ -4,6 +4,7 @@ import { Column, DataType, Table, Model } from 'sequelize-typescript';
 export class Category extends Model {
   @Column({
     type: DataType.STRING,
+    unique: true,
     allowNull: false,
   })
   name: string;

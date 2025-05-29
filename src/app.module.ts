@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { UsersModule } from './users/users.module';
 import { ProductsModule } from './products/products.module';
 import { CategoriesModule } from './categories/categories.module';
 import { ReviewsModule } from './reviews/reviews.module';
@@ -8,6 +7,10 @@ import { AdminModule } from './admin/admin.module';
 import config from './config';
 import { Admin } from './admin/models/admin.model';
 import { JwtModule } from '@nestjs/jwt';
+import { CustomerModule } from './customer/customer.module';
+import { SellerModule } from './seller/seller.module';
+import { Customer } from './customer/models/customer.model';
+import { Seller } from './seller/models/seller.model';
 
 @Module({
   imports: [
@@ -21,16 +24,17 @@ import { JwtModule } from '@nestjs/jwt';
       synchronize: true,
       logging: false,
       autoLoadModels: true,
-      models: [Admin]
+      models: [Admin, Customer, Seller]
     }),
     JwtModule.register({
       global: true
     }),
-    UsersModule,
     ProductsModule,
     CategoriesModule,
     ReviewsModule,
-    AdminModule
+    AdminModule,
+    CustomerModule,
+    SellerModule
   ]
 })
 export class AppModule { }

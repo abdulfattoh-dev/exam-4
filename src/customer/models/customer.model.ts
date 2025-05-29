@@ -2,7 +2,7 @@ import { Column, DataType, Model, Table } from "sequelize-typescript";
 import { Status, UserRoles } from "src/enum";
 
 @Table({ tableName: "users" })
-export class User extends Model {
+export class Customer extends Model {
     @Column({
         type: DataType.STRING,
         allowNull: false
@@ -36,7 +36,7 @@ export class User extends Model {
     address: string;
 
     @Column({
-        type: DataType.ENUM(UserRoles.SELLER, UserRoles.CUSTOMER),
+        type: DataType.ENUM(UserRoles.CUSTOMER),
         defaultValue: UserRoles.CUSTOMER
     })
     role: string;

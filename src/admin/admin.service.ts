@@ -8,13 +8,15 @@ import { AdminRoles } from 'src/enum';
 import config from 'src/config';
 import { catchError } from 'src/utils/catch-error';
 import { SignInAdminDto } from './dto/sign-in-admin.dto';
-import { JwtService } from '@nestjs/jwt';
+import { TokenService } from 'src/utils/generate-token';
+import { writeToCookie } from 'src/utils/write-cookie';
+import { Response } from 'express';
 
 @Injectable()
 export class AdminService implements OnModuleInit {
   constructor(
     @InjectModel(Admin) private model: typeof Admin,
-    private readonly jwtService: JwtService
+    private readonly token: TokenService
   ) { }
 
   async onModuleInit(): Promise<void> {
@@ -36,7 +38,7 @@ export class AdminService implements OnModuleInit {
     }
   }
 
-  async create(createAdminDto: CreateAdminDto) {
+  async create(createAdminDto: CreateAdminDto): Promise<object> {
     try {
       const { email, phone_number, password, } = createAdminDto;
       const existingEmail = await this.model.findOne({ where: { email } });
@@ -68,7 +70,7 @@ export class AdminService implements OnModuleInit {
     }
   }
 
-  async signIn(signInAdminDto: SignInAdminDto) {
+  async signIn(signInAdminDto: SignInAdminDto, res: Response): Promise<object> {
     try {
       const { email, password } = signInAdminDto;
       const admin = await this.model.findOne({ where: { email } });
@@ -77,23 +79,33 @@ export class AdminService implements OnModuleInit {
         throw new BadRequestException("Invalid email or password");
       }
 
-      const isMatchPassword = await comparePassword(password, admin.hashed_password);
+      const isMatchPassword = await comparePassword(password, admin.dataValues?.hashed_password);
 
       if (!isMatchPassword) {
         throw new BadRequestException("Invalid email or password");
       }
 
       const payload = {
-        id: admin.id,
-        role: admin.role,
-        status: admin.status
+        id: admin.dataValues.id,
+        role: admin.dataValues.role,
+        status: admin.dataValues.status
+      }
+      const accessToken = await this.token.generateAccessToken(payload);
+      const refreshToken = await this.token.generateRefreshToken(payload);
+
+      writeToCookie(res, "refreshTokenAdmin", refreshToken);
+
+      return {
+        statusCode: 200,
+        message: "success",
+        data: accessToken
       }
     } catch (error) {
       return catchError(error);
     }
   }
 
-  async findAll() {
+  async findAll(): Promise<object> {
     try {
       return this.model.findAll({ where: { role: ["admin", "superadmin"] }, attributes: { exclude: ["hashed_password"] } });
     } catch (error) {
@@ -101,7 +113,7 @@ export class AdminService implements OnModuleInit {
     }
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<object> {
     try {
       const admin = await this.model.findByPk(id, { attributes: { exclude: ["hashed_password"] } });
 
@@ -119,7 +131,7 @@ export class AdminService implements OnModuleInit {
     }
   }
 
-  async update(id: number, updateAdminDto: UpdateAdminDto) {
+  async update(id: number, updateAdminDto: UpdateAdminDto): Promise<object> {
     try {
       const admin = await this.model.findByPk(id);
 
@@ -150,7 +162,7 @@ export class AdminService implements OnModuleInit {
     }
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<object> {
     try {
       const admin = await this.model.findByPk(id);
 

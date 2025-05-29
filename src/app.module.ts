@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { UsersModule } from './users/users.module';
 import { ProductsModule } from './products/products.module';
 import { CategoriesModule } from './categories/categories.module';
 import { ReviewsModule } from './reviews/reviews.module';
@@ -11,30 +12,34 @@ import { CustomerModule } from './customer/customer.module';
 import { SellerModule } from './seller/seller.module';
 import { Customer } from './customer/models/customer.model';
 import { Seller } from './seller/models/seller.model';
+import { Product } from './products/models/product.model';
+import { WalletModule } from './wallet/wallet.module';
+import { Wallet } from './wallet/models/wallet.model';
 
 @Module({
-  imports: [
-    SequelizeModule.forRoot({
-      dialect: "postgres",
-      host: config.PG_HOST,
-      port: config.PG_PORT,
-      username: config.PG_USER,
-      password: config.PG_PASS,
-      database: config.PG_DB,
-      synchronize: true,
-      logging: false,
-      autoLoadModels: true,
-      models: [Admin, Customer, Seller]
-    }),
-    JwtModule.register({
-      global: true
-    }),
-    ProductsModule,
-    CategoriesModule,
-    ReviewsModule,
-    AdminModule,
-    CustomerModule,
-    SellerModule
-  ]
+    imports: [
+        SequelizeModule.forRoot({
+            dialect: "postgres",
+            host: config.PG_HOST,
+            port: config.PG_PORT,
+            username: config.PG_USER,
+            password: config.PG_PASS,
+            database: config.PG_DB,
+            synchronize: true,
+            logging: false,
+            autoLoadModels: true,
+            models: [Admin, Customer, Seller, Product, Wallet]
+        }),
+        JwtModule.register({
+            global: true
+        }),
+        ProductsModule,
+        CategoriesModule,
+        ReviewsModule,
+        AdminModule,
+        CustomerModule,
+        SellerModule,
+        WalletModule
+    ]
 })
 export class AppModule { }

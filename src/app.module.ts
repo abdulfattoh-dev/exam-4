@@ -9,6 +9,7 @@ import config from './config';
 import { Admin } from './admin/models/admin.model';
 import { JwtModule } from '@nestjs/jwt';
 import { Category } from './categories/models/category.model';
+import { BasketModule } from './basket/basket.module';
 
 @Module({
   imports: [
@@ -32,7 +33,8 @@ import { Category } from './categories/models/category.model';
     ProductsModule,
     CategoriesModule,
     ReviewsModule,
-    AdminModule
+    AdminModule,
+    BasketModule
   ]
 })
 export class AppModule {}

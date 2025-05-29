@@ -8,9 +8,10 @@ import config from './config';
 import { Product } from './products/models/product.model';
 import { WalletModule } from './wallet/wallet.module';
 import { Wallet } from './wallet/models/wallet.model';
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
-  imports: [
+  imports: [4
     SequelizeModule.forRoot({
       dialect: "postgres",
       host: config.PG_HOST,
@@ -27,6 +28,7 @@ import { Wallet } from './wallet/models/wallet.model';
     ProductsModule,
     CategoriesModule,
     ReviewsModule,
-    WalletModule]
+    WalletModule,
+    OrdersModule]
 })
 export class AppModule { }

@@ -15,6 +15,8 @@ import { Seller } from './seller/models/seller.model';
 import { Product } from './products/models/product.model';
 import { WalletModule } from './wallet/wallet.module';
 import { Wallet } from './wallet/models/wallet.model';
+import { OrdersModule } from './orders/orders.module';
+import { Order } from './orders/models/order.model';
 
 @Module({
     imports: [
@@ -28,7 +30,7 @@ import { Wallet } from './wallet/models/wallet.model';
             synchronize: true,
             logging: false,
             autoLoadModels: true,
-            models: [Admin, Customer, Seller, Product, Wallet]
+            models: [Admin, Customer, Seller, Product, Wallet, Order]
         }),
         JwtModule.register({
             global: true
@@ -39,7 +41,8 @@ import { Wallet } from './wallet/models/wallet.model';
         AdminModule,
         CustomerModule,
         SellerModule,
-        WalletModule
+        WalletModule,
+        OrdersModule
     ]
 })
 export class AppModule { }

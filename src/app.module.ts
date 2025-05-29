@@ -5,6 +5,9 @@ import { CategoriesModule } from './categories/categories.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { SequelizeModule } from '@nestjs/sequelize';
 import config from './config';
+import { Product } from './products/models/product.model';
+import { WalletModule } from './wallet/wallet.module';
+import { Wallet } from './wallet/models/wallet.model';
 
 @Module({
   imports: [
@@ -18,11 +21,12 @@ import config from './config';
       synchronize: true,
       logging: false,
       autoLoadModels: true,
-      models: []
+      models: [Product, Wallet]
     }),
     UsersModule,
     ProductsModule,
     CategoriesModule,
-    ReviewsModule]
+    ReviewsModule,
+    WalletModule]
 })
 export class AppModule { }

@@ -3,13 +3,14 @@ import { CreateBasketDto } from './dto/create-basket.dto';
 import { UpdateBasketDto } from './dto/update-basket.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import { Basket } from './model/basket.model';
+import { catchError } from 'src/utils/catch-error';
 
 @Injectable()
 export class BasketService {
   constructor(
     @InjectModel(Basket) private basketModel: typeof Basket
   ){}
-  async create(createBasketDto: CreateBasketDto) {
+  async create(createBasketDto: CreateBasketDto): Promise<object> {
     try {
       const newBasket = await this.basketModel.create({...createBasketDto})
       return{
@@ -18,12 +19,13 @@ export class BasketService {
         data: newBasket
       }
     } catch (error) {
-      throw new InternalServerErrorException(error.message)
+      return catchError(error)
+     
       
     }
   }
 
-  async findAll() {
+  async findAll(): Promise<object> {
     try {
       const baskets = await this.basketModel.findAll();
       if(!baskets?.length){
@@ -35,13 +37,13 @@ export class BasketService {
         data: baskets
       }
     } catch (error) {
-      throw new InternalServerErrorException(error.message)
+      return catchError(error)
       
     }
     
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<object> {
     try {
       const baskets = await this.basketModel.findByPk(id);
       if(!baskets){
@@ -54,13 +56,13 @@ export class BasketService {
       }
       
     } catch (error) {
-      throw new InternalServerErrorException(error.message)
+      return catchError(error)
       
     }
     
   }
 
-  async update(id: number, updateBasketDto: UpdateBasketDto) {
+  async update(id: number, updateBasketDto: UpdateBasketDto): Promise<object> {
     try {
       const baskets = await this.basketModel.findByPk(id);
       if(!baskets){
@@ -74,12 +76,12 @@ export class BasketService {
         data: basket
       }
     } catch (error) {
-      throw new InternalServerErrorException(error.message)
+      return catchError(error)
       
     }
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<object> {
     try {
       const baskets = await this.basketModel.findByPk(id);
       if (!baskets){
@@ -93,7 +95,7 @@ export class BasketService {
       }
       
     } catch (error) {
-      throw new InternalServerErrorException(error.message)
+      return catchError(error)
       
     }
   }

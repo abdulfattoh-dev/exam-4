@@ -10,6 +10,9 @@ import { Admin } from './admin/models/admin.model';
 import { JwtModule } from '@nestjs/jwt';
 import { Category } from './categories/models/category.model';
 import { BasketModule } from './basket/basket.module';
+import { OrderItemModule } from './order-item/order-item.module';
+import { Basket } from './basket/model/basket.model';
+import { OrderItem } from './order-item/model/order-item.model';
 
 @Module({
   imports: [
@@ -23,7 +26,7 @@ import { BasketModule } from './basket/basket.module';
       synchronize: true,
       logging: false,
       autoLoadModels: true,
-      models: [Category],
+      models: [Category, Basket, OrderItem],
       
     }),
     JwtModule.register({
@@ -34,7 +37,8 @@ import { BasketModule } from './basket/basket.module';
     CategoriesModule,
     ReviewsModule,
     AdminModule,
-    BasketModule
+    BasketModule,
+    OrderItemModule
   ]
 })
 export class AppModule {}

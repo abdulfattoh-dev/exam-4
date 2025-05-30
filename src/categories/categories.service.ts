@@ -3,6 +3,7 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import { Category } from './models/category.model';
+import { catchError } from 'src/utils/catch-error';
 
 0
 @Injectable()
@@ -11,7 +12,7 @@ export class CategoriesService {
     @InjectModel(Category) private categoryModel: typeof Category
   ) {}
 
-  async create(createCategoryDto: CreateCategoryDto) {
+  async create(createCategoryDto: CreateCategoryDto): Promise<object> {
     try {
       const newCategory = await this.categoryModel.create({ ...createCategoryDto });
     return {
@@ -20,11 +21,11 @@ export class CategoriesService {
       data: newCategory
     }
     } catch (error) {
-      throw new InternalServerErrorException(error.message)
+      return catchError(error)
     }
   }
 
-  async findAll() {
+  async findAll(): Promise<object>  {
     try {
       const categories = await this.categoryModel.findAll();
       if(!categories?.length){
@@ -36,12 +37,12 @@ export class CategoriesService {
         data: categories
       }
     } catch (error) {
-      throw new InternalServerErrorException(error.message)
+      return catchError(error)
     }
 
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<object> {
     try {
       const categories = await this.categoryModel.findByPk(id);
       if(!categories){
@@ -54,13 +55,13 @@ export class CategoriesService {
       }
 
     } catch (error) {
-      throw new InternalServerErrorException(error.message)
+      return catchError(error)
 
     }
 
   }
 
-  async update(id: number, updateCategoryDto: UpdateCategoryDto) {
+  async update(id: number, updateCategoryDto: UpdateCategoryDto): Promise<object> {
     try {
       const categories = await this.categoryModel.findByPk(id);
       if(!categories){
@@ -75,12 +76,12 @@ export class CategoriesService {
       }
 
     } catch (error) {
-      throw new InternalServerErrorException(error.message)
+      return catchError(error)
 
     }
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<object> {
   try {
     const categories = await this.categoryModel.findByPk(id);
     if(!categories){
@@ -95,7 +96,7 @@ export class CategoriesService {
     };
 
   } catch (error) {
-    throw new InternalServerErrorException(error.message)
+    return catchError(error)
 
   }
 

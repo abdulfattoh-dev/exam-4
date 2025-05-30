@@ -39,18 +39,14 @@ export class Order extends Model{
     phoneNumber: string
 
     @Column({
-        type: DataType.STRING,
-    })
-
-    @Column({
         type: DataType.ENUM('Mail', 'delivery'),
-        allowNull: false
     })
     delivery: string
 
 
     @Column({
-        type: DataType.ENUM('Accepted Order', 'Preparing', 'Delivering', 'Delivered', 'Closed')
+        type: DataType.ENUM('Accepted Order', 'Preparing', 'Delivering', 'Delivered', 'Closed'),
+        allowNull: false
     })
     status: string
 }

@@ -10,7 +10,7 @@ export class CreateOrderDto {
     items: string
 
     @IsNotEmpty()
-    @IsDecimal()
+    @IsNumber()
     total_price: number
 
     @IsNotEmpty()
@@ -26,7 +26,10 @@ export class CreateOrderDto {
     @IsPhoneNumber('UZ')
     phoneNumber: string
 
-    @IsNotEmpty()
     @IsString()
-    delivery: string    
+    delivery: string  
+    
+    @IsString()
+    @IsNotEmpty()
+    status: string
 }

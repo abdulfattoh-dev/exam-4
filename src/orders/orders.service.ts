@@ -18,7 +18,7 @@ export class OrdersService {
         data: newOrder
       };
     } catch (error) {
-      return catchError(error.message);
+      return catchError(error);
     }
   }
 
@@ -34,7 +34,7 @@ export class OrdersService {
         data: orders
       }
     } catch (error) {
-      return catchError(error.message);
+      return catchError(error);
     }
   }
 
@@ -50,7 +50,7 @@ export class OrdersService {
         data: orderId,
       };
     } catch (error) {
-      return catchError(error.message);
+      return catchError(error);
     }
   }
 
@@ -70,7 +70,7 @@ export class OrdersService {
         data: updateOrder,
       };
     } catch (error) {
-      return catchError(error.message);
+      return catchError(error);
     }
   }
 
@@ -87,7 +87,7 @@ export class OrdersService {
         data: { data: {} },
       };
     } catch (error) {
-      return catchError(error.message);
+      return catchError(error);
     }
   }
 }

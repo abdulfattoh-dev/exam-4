@@ -15,7 +15,7 @@ export class Order extends Model{
     items: string
 
     @Column({
-        type: DataType.DECIMAL,
+        type: DataType.INTEGER,
         allowNull: false
     })
     total_price: number
@@ -39,7 +39,7 @@ export class Order extends Model{
     phoneNumber: string
 
     @Column({
-        type: DataType.ENUM('Mail', 'delivery'),
+        type: DataType.ENUM('mail', 'delivery'),
     })
     delivery: string
 

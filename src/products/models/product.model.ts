@@ -1,4 +1,5 @@
 import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from "sequelize-typescript";
+import { Seller } from "src/seller/models/seller.model";
 
 
 @Table ({tableName: 'product'})
@@ -26,6 +27,15 @@ export class Product extends Model {
     })
     quantity: number
 
+
+    // @ForeignKey(() => Seller)
+    // @Column({
+    //     type: DataType.INTEGER,
+    //     allowNull: false
+    // })
+    // seller_id: number
+
+    
     // @ForeignKey(() => Category)
     // @Column({
     //     type: DataType.INTEGER,
@@ -33,13 +43,6 @@ export class Product extends Model {
     // })
     // category_id: number;
     // @BelongsTo(() => Category)
-
-    // @ForeignKey(() => User)
-    // @Column({
-    //     type: DataType.INTEGER,
-    //     allowNull: false
-    // })
-    // user_id: number
 
     // @Column({
     //     type: DataType.STRING,

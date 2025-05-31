@@ -5,8 +5,8 @@ import {
 import { Product } from './models/product.model';
 import { InjectModel } from '@nestjs/sequelize';
 import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateCategoryDto } from 'src/categories/dto/update-category.dto';
 import { catchError } from 'src/utils/catch-error';
+import { UpdateProductDto } from './dto/update-product.dto';
 
 @Injectable()
 export class ProductsService {
@@ -57,7 +57,7 @@ export class ProductsService {
     }
   }
 
-  async update(id: number, updateProductDto: UpdateCategoryDto): Promise<object> {
+  async update(id: number, updateProductDto: UpdateProductDto): Promise<object> {
     try {
       const productId = await this.productModel.findByPk(id);
       if(!productId) {

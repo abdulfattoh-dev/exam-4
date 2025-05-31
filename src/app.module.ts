@@ -20,44 +20,50 @@ import { MailModule } from './mail/mail.module';
 import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { PaymentModule } from './payment/payment.module';
-
+import { Category } from './categories/models/category.model';
+import { BasketModule } from './basket/basket.module';
+import { OrderItemModule } from './order-item/order-item.module';
+import { Basket } from './basket/model/basket.model';
+import { OrderItem } from './order-item/model/order-item.model';
 
 @Module({
-    imports: [
-        SequelizeModule.forRoot({
-            dialect: "postgres",
-            host: config.PG_HOST,
-            port: config.PG_PORT,
-            username: config.PG_USER,
-            password: config.PG_PASS,
-            database: config.PG_DB,
-            synchronize: true,
-            logging: false,
-            autoLoadModels: true,
-            models: [Admin, Customer, Seller, Product, Wallet, Order]
-        }),
-        JwtModule.register({
-            global: true
-        }),
-        CacheModule.register({
-            isGlobal: true
-        }),
-        ProductsModule,
-        CategoriesModule,
-        ReviewsModule,
-        AdminModule,
-        CustomerModule,
-        SellerModule,
-        WalletModule,
-        OrdersModule,
-        PaymentModule,
-        MailModule
-    ],
-    providers: [
-        {
-            provide: APP_INTERCEPTOR,
-            useClass: CacheInterceptor
-        }
-    ]
+  imports: [
+    SequelizeModule.forRoot({
+      dialect: "postgres",
+      host: config.PG_HOST,
+      port: config.PG_PORT,
+      username: config.PG_USER,
+      password: config.PG_PASS,
+      database: config.PG_DB,
+      synchronize: true,
+      logging: false,
+      autoLoadModels: true,
+      models: [Admin, Customer, Seller, Product, Wallet, Order, Category, Basket, OrderItem]
+    }),
+    JwtModule.register({
+      global: true
+    }),
+    CacheModule.register({
+      isGlobal: true
+    }),
+    ProductsModule,
+    CategoriesModule,
+    ReviewsModule,
+    AdminModule,
+    CustomerModule,
+    SellerModule,
+    WalletModule,
+    OrdersModule,
+    PaymentModule,
+    MailModule,
+    BasketModule,
+    OrderItemModule
+  ],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: CacheInterceptor
+    }
+  ]
 })
 export class AppModule { }

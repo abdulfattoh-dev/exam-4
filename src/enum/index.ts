@@ -1,14 +1,14 @@
 export enum Status {
-    ACTIVE = "active",
-    INACTIVE = "inactive"
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
 }
 
 export enum UserRoles {
-    SELLER = "seller",
-    CUSTOMER = "customer"
+  SELLER = 'seller',
+  CUSTOMER = 'customer',
 }
 
 export enum AdminRoles {
-    SUPERADMIN = "superadmin",
-    ADMIN = "admin"
+  SUPERADMIN = 'superadmin',
+  ADMIN = 'admin',
 }

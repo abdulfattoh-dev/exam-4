@@ -19,6 +19,8 @@ import { Order } from './orders/models/order.model';
 import { MailModule } from './mail/mail.module';
 import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
 import { APP_INTERCEPTOR } from '@nestjs/core';
+import { PaymentModule } from './payment/payment.module';
+
 
 @Module({
     imports: [
@@ -48,6 +50,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
         SellerModule,
         WalletModule,
         OrdersModule,
+        PaymentModule,
         MailModule
     ],
     providers: [

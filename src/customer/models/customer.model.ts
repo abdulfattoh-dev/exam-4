@@ -36,7 +36,7 @@ export class Customer extends Model {
     address: string;
 
     @Column({
-        type: DataType.ENUM(UserRoles.CUSTOMER),
+        type: DataType.ENUM(UserRoles.CUSTOMER, UserRoles.SELLER),
         defaultValue: UserRoles.CUSTOMER
     })
     role: string;

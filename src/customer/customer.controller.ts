@@ -4,6 +4,7 @@ import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { SignInCustomerDto } from './dto/sign-in-customer.dto';
 import { Response } from 'express';
+import { ConfirmSignInCustomerDto } from './dto/confirm-sign-in-customer.dto';
 
 @Controller('customer')
 export class CustomerController {
@@ -14,9 +15,14 @@ export class CustomerController {
     return this.customerService.create(createCustomerDto);
   }
 
-  @Post()
-  async signIn(@Body() signInCustomerDto: SignInCustomerDto, @Res({ passthrough: true }) res: Response) {
-    return this.customerService.signIn(signInCustomerDto, res);
+  @Post("sign-in")
+  async signIn(@Body() signInCustomerDto: SignInCustomerDto) {
+    return this.customerService.signIn(signInCustomerDto);
+  }
+
+  @Post("confirm-sign-in")
+  async confirmSignIn(@Body() confirmSignInCustomerDto: ConfirmSignInCustomerDto, @Res({ passthrough: true }) res: Response) {
+    return this.customerService.confirmSignIn(confirmSignInCustomerDto, res);
   }
 
   @Get()

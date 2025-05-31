@@ -4,6 +4,7 @@ import { CreateSellerDto } from './dto/create-seller.dto';
 import { UpdateSellerDto } from './dto/update-seller.dto';
 import { SignInSellerDto } from './dto/sign-in-seller.dto';
 import { Response } from 'express';
+import { ConfirmSignInSellerDto } from './dto/confirm-sign-in-seller.dto';
 
 @Controller('seller')
 export class SellerController {
@@ -14,9 +15,14 @@ export class SellerController {
     return this.sellerService.create(createSellerDto);
   }
 
-  @Post()
-  async signIn(@Body() signInSellerDto: SignInSellerDto, @Res({ passthrough: true }) res: Response) {
-    return this.sellerService.signIn(signInSellerDto, res);
+  @Post("sign-in")
+  async signIn(@Body() signInSellerDto: SignInSellerDto) {
+    return this.sellerService.signIn(signInSellerDto);
+  }
+
+  @Post("confirm-sign-in")
+  async confirmSignIn(@Body() confirmSignInSellerDto: ConfirmSignInSellerDto, @Res({ passthrough: true }) res: Response) {
+    return this.sellerService.confirmSignIn(confirmSignInSellerDto, res);
   }
 
   @Get()

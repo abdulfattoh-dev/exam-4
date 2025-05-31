@@ -19,5 +19,5 @@ export class CreateCustomerDto {
 
     @IsNotEmpty()
     @IsString()
-    addess: string;
+    address: string;
 }

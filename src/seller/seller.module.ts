@@ -4,9 +4,13 @@ import { SellerController } from './seller.controller';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Seller } from './models/seller.model';
 import { TokenService } from 'src/utils/generate-token';
+import { MailModule } from 'src/mail/mail.module';
 
 @Module({
-  imports: [SequelizeModule.forFeature([Seller])],
+  imports: [
+    SequelizeModule.forFeature([Seller]),
+    MailModule
+  ],
   controllers: [SellerController],
   providers: [SellerService, TokenService],
 })

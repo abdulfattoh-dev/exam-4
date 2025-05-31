@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { InjectModel } from '@nestjs/sequelize';
@@ -11,12 +11,19 @@ import { SignInAdminDto } from './dto/sign-in-admin.dto';
 import { TokenService } from 'src/utils/generate-token';
 import { writeToCookie } from 'src/utils/write-cookie';
 import { Response } from 'express';
+import { generateOTP } from 'src/utils/generate-otp';
+import { MailService } from 'src/mail/mail.service';
+import { ConfirmSignInAdminDto } from './dto/confirm-sign-in-admin.dto';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class AdminService implements OnModuleInit {
   constructor(
     @InjectModel(Admin) private model: typeof Admin,
-    private readonly token: TokenService
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private readonly tokenService: TokenService,
+    private readonly mailService: MailService
   ) { }
 
   async onModuleInit(): Promise<void> {
@@ -70,7 +77,7 @@ export class AdminService implements OnModuleInit {
     }
   }
 
-  async signIn(signInAdminDto: SignInAdminDto, res: Response): Promise<object> {
+  async signIn(signInAdminDto: SignInAdminDto): Promise<object> {
     try {
       const { email, password } = signInAdminDto;
       const admin = await this.model.findOne({ where: { email } });
@@ -85,13 +92,35 @@ export class AdminService implements OnModuleInit {
         throw new BadRequestException("Invalid email or password");
       }
 
-      const payload = {
-        id: admin.dataValues.id,
-        role: admin.dataValues.role,
-        status: admin.dataValues.status
+      const otp = generateOTP();
+
+      await this.mailService.sentOtp(email, otp);
+      await this.cacheManager.set(email, otp);
+
+      return {
+        statusCode: 200,
+        message: "success",
+        data: email
       }
-      const accessToken = await this.token.generateAccessToken(payload);
-      const refreshToken = await this.token.generateRefreshToken(payload);
+    } catch (error) {
+      return catchError(error);
+    }
+  }
+
+  async confirmSignIn(confirmSignInAdminDto: ConfirmSignInAdminDto, res: Response): Promise<object> {
+    try {
+      const { email, otp } = confirmSignInAdminDto;
+      const hasAdmin = await this.cacheManager.get(email);
+
+      if (!hasAdmin || hasAdmin != otp) {
+        throw new BadRequestException("OTP expired");
+      }
+
+      const admin = await this.model.findOne({ where: { email } });
+      const { id, role, status } = admin?.dataValues;
+      const payload = { id, role, status }
+      const accessToken = await this.tokenService.generateAccessToken(payload);
+      const refreshToken = await this.tokenService.generateRefreshToken(payload);
 
       writeToCookie(res, "refreshTokenAdmin", refreshToken);
 

@@ -33,7 +33,7 @@ export class AuthGuard implements CanActivate {
             if (!user) {
                 throw new UnauthorizedException("Token expired");
             }
-            
+
             req.user = user;
 
             return true;

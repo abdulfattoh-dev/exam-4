@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateSellerDto } from './dto/create-seller.dto';
 import { UpdateSellerDto } from './dto/update-seller.dto';
 import { InjectModel } from '@nestjs/sequelize';
@@ -10,12 +10,19 @@ import { SignInSellerDto } from './dto/sign-in-seller.dto';
 import { Response } from 'express';
 import { TokenService } from 'src/utils/generate-token';
 import { writeToCookie } from 'src/utils/write-cookie';
+import { generateOTP } from 'src/utils/generate-otp';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
+import { MailService } from 'src/mail/mail.service';
+import { ConfirmSignInSellerDto } from './dto/confirm-sign-in-seller.dto';
 
 @Injectable()
 export class SellerService {
   constructor(
     @InjectModel(Seller) private model: typeof Seller,
-    private readonly token: TokenService
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private readonly tokenService: TokenService,
+    private readonly mailService: MailService
   ) { }
 
   async create(createSellerDto: CreateSellerDto) {
@@ -50,7 +57,7 @@ export class SellerService {
     }
   }
 
-  async signIn(signInSellerDto: SignInSellerDto, res: Response): Promise<object> {
+  async signIn(signInSellerDto: SignInSellerDto): Promise<object> {
     try {
       const { email, password } = signInSellerDto;
       const seller = await this.model.findOne({ where: { email } });
@@ -65,15 +72,37 @@ export class SellerService {
         throw new BadRequestException("Invalid email or password");
       }
 
-      const payload = {
-        id: seller.dataValues.id,
-        role: seller.dataValues.role,
-        status: seller.dataValues.status
-      }
-      const accessToken = await this.token.generateAccessToken(payload);
-      const refreshToken = await this.token.generateRefreshToken(payload);
+      const otp = generateOTP();
 
-      writeToCookie(res, "refreshTokenCustomer", refreshToken);
+      await this.mailService.sentOtp(email, otp);
+      await this.cacheManager.set(email, otp);
+
+      return {
+        statusCode: 200,
+        message: "success",
+        data: email
+      }
+    } catch (error) {
+      return catchError(error);
+    }
+  }
+
+  async confirmSignIn(confirmSignInSellerDto: ConfirmSignInSellerDto, res: Response): Promise<object> {
+    try {
+      const { email, otp } = confirmSignInSellerDto;
+      const hasSeller = await this.cacheManager.get(email);
+
+      if (!hasSeller || hasSeller != otp) {
+        throw new BadRequestException("OTP expired");
+      }
+
+      const seller = await this.model.findOne({ where: { email } });
+      const { id, role, status } = seller?.dataValues;
+      const payload = { id, role, status }
+      const accessToken = await this.tokenService.generateAccessToken(payload);
+      const refreshToken = await this.tokenService.generateRefreshToken(payload);
+
+      writeToCookie(res, "refreshTokenSeller", refreshToken);
 
       return {
         statusCode: 200,

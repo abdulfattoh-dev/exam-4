@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { CreateReviewDto } from './dto/create-review.dto';
+import { UpdateReviewDto } from './dto/update-review.dto';
 import { Review } from './models/review.model';
 
 @Injectable()
@@ -36,6 +37,18 @@ export class ReviewService {
     } catch (error) {
       console.error('Error fetching reviews by product:', error.message);
       throw new InternalServerErrorException('Ushbu mahsulot uchun reviewlarni olishda xatolik yuz berdi');
+    }
+  }
+
+    async update(id: number, dto: UpdateReviewDto): Promise<Review> {
+    try {
+      const review = await this.reviewModel.findByPk(id);
+      if (!review) throw new NotFoundException('Review topilmadi');
+      return await review.update(dto);
+    } catch (error) {
+      console.error('Error updating review:', error.message);
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Reviewni yangilashda xatolik yuz berdi');
     }
   }
 

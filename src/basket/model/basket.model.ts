@@ -1,25 +1,24 @@
-import { Column, DataType, Table, Model } from "sequelize-typescript";
+import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from 'sequelize-typescript';
+import { Product } from 'src/products/models/product.model';
+import { User } from 'src/users/models/user.model';
 
-@Table({ tableName: 'basket' })
-export class Basket extends Model {
-    @Column({
-        type: DataType.INTEGER,
-        allowNull: false,
+@Table({ tableName: 'baskets' })
+export class Basket extends Model{
+  
+//   @ForeignKey(() => User)
+//   @Column({ type: DataType.INTEGER, allowNull: false })
+//   userId: number;
 
-    })
-    user_id: number
+//   @ForeignKey(() => Product)
+//   @Column({ type: DataType.INTEGER, allowNull: false })
+//   productId: number;
 
-    @Column({
-        type: DataType.INTEGER,
-        allowNull: false,
-    })
-    product_id: number
+  @Column({ type: DataType.INTEGER, allowNull: false })
+  quantity: number;
 
-    @Column({
-        type: DataType.NUMBER,
-        allowNull: false,
-    })
+  @BelongsTo(() => User)
+  user: User;
 
-    quantity: number
-
+//   @BelongsTo(() => Product)
+//   product: Product;
 }

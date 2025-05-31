@@ -47,17 +47,21 @@ export class AdminService implements OnModuleInit {
 
   async create(createAdminDto: CreateAdminDto): Promise<object> {
     try {
-      const { email, phone_number, password, } = createAdminDto;
+      const { email, phone_number, password } = createAdminDto;
       const existingEmail = await this.model.findOne({ where: { email } });
 
       if (existingEmail) {
         throw new ConflictException(`Email: ${email} already exists`);
       }
 
-      const existingPhoneNumber = await this.model.findOne({ where: { phone_number } });
+      const existingPhoneNumber = await this.model.findOne({
+        where: { phone_number },
+      });
 
       if (existingPhoneNumber) {
-        throw new ConflictException(`Phone number: ${phone_number} already exists`);
+        throw new ConflictException(
+          `Phone number: ${phone_number} already exists`,
+        );
       }
 
       const hashedPassword = await hashPassword(password);
@@ -69,9 +73,9 @@ export class AdminService implements OnModuleInit {
 
       return {
         statusCode: 201,
-        message: "success",
-        data: admin
-      }
+        message: 'success',
+        data: admin,
+      };
     } catch (error) {
       return catchError(error);
     }
@@ -136,7 +140,10 @@ export class AdminService implements OnModuleInit {
 
   async findAll(): Promise<object> {
     try {
-      return this.model.findAll({ where: { role: ["admin", "superadmin"] }, attributes: { exclude: ["hashed_password"] } });
+      return this.model.findAll({
+        where: { role: ['admin', 'superadmin'] },
+        attributes: { exclude: ['hashed_password'] },
+      });
     } catch (error) {
       return catchError(error);
     }
@@ -144,7 +151,9 @@ export class AdminService implements OnModuleInit {
 
   async findOne(id: number): Promise<object> {
     try {
-      const admin = await this.model.findByPk(id, { attributes: { exclude: ["hashed_password"] } });
+      const admin = await this.model.findByPk(id, {
+        attributes: { exclude: ['hashed_password'] },
+      });
 
       if (!admin) {
         throw new NotFoundException(`Admin not found by id: ${id}`);
@@ -152,9 +161,9 @@ export class AdminService implements OnModuleInit {
 
       return {
         statusCode: 200,
-        message: "success",
-        data: admin
-      }
+        message: 'success',
+        data: admin,
+      };
     } catch (error) {
       return catchError(error);
     }
@@ -174,18 +183,23 @@ export class AdminService implements OnModuleInit {
         updateAdminDto.password = await hashPassword(password);
       }
 
-      await this.model.update({
-        ...updateAdminDto,
-        hashed_password: updateAdminDto.password
-      }, { where: { id } });
+      await this.model.update(
+        {
+          ...updateAdminDto,
+          hashed_password: updateAdminDto.password,
+        },
+        { where: { id } },
+      );
 
-      const updatedAdmin = await this.model.findByPk(id, { attributes: { exclude: ["hashed_password"] } });
+      const updatedAdmin = await this.model.findByPk(id, {
+        attributes: { exclude: ['hashed_password'] },
+      });
 
       return {
         statusCode: 200,
-        message: "success",
-        data: updatedAdmin
-      }
+        message: 'success',
+        data: updatedAdmin,
+      };
     } catch (error) {
       return catchError(error);
     }
@@ -199,17 +213,17 @@ export class AdminService implements OnModuleInit {
         throw new NotFoundException(`Admin not found by id: ${id}`);
       }
 
-      if (admin.role === "superadmin") {
-        throw new ConflictException("Super admin cannot be deleted");
+      if (admin.role === 'superadmin') {
+        throw new ConflictException('Super admin cannot be deleted');
       }
 
       await this.model.destroy({ where: { id } });
 
       return {
         statusCode: 200,
-        message: "success",
-        data: {}
-      }
+        message: 'success',
+        data: {},
+      };
     } catch (error) {
       return catchError(error);
     }

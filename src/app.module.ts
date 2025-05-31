@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { UsersModule } from './users/users.module';
 import { ProductsModule } from './products/products.module';
 import { CategoriesModule } from './categories/categories.module';
 import { ReviewsModule } from './reviews/reviews.module';
@@ -8,6 +7,19 @@ import { AdminModule } from './admin/admin.module';
 import config from './config';
 import { Admin } from './admin/models/admin.model';
 import { JwtModule } from '@nestjs/jwt';
+import { CustomerModule } from './customer/customer.module';
+import { SellerModule } from './seller/seller.module';
+import { Customer } from './customer/models/customer.model';
+import { Seller } from './seller/models/seller.model';
+import { Product } from './products/models/product.model';
+import { WalletModule } from './wallet/wallet.module';
+import { Wallet } from './wallet/models/wallet.model';
+import { OrdersModule } from './orders/orders.module';
+import { Order } from './orders/models/order.model';
+import { MailModule } from './mail/mail.module';
+import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { PaymentModule } from './payment/payment.module';
 import { Category } from './categories/models/category.model';
 import { BasketModule } from './basket/basket.module';
 import { OrderItemModule } from './order-item/order-item.module';
@@ -17,7 +29,7 @@ import { OrderItem } from './order-item/model/order-item.model';
 @Module({
   imports: [
     SequelizeModule.forRoot({
-      dialect: 'postgres',
+      dialect: "postgres",
       host: config.PG_HOST,
       port: config.PG_PORT,
       username: config.PG_USER,
@@ -26,19 +38,32 @@ import { OrderItem } from './order-item/model/order-item.model';
       synchronize: true,
       logging: false,
       autoLoadModels: true,
-      models: [Category, Basket, OrderItem],
-      
+      models: [Admin, Customer, Seller, Product, Wallet, Order, Category, Basket, OrderItem]
     }),
     JwtModule.register({
       global: true
     }),
-    UsersModule,
+    CacheModule.register({
+      isGlobal: true
+    }),
     ProductsModule,
     CategoriesModule,
     ReviewsModule,
     AdminModule,
+    CustomerModule,
+    SellerModule,
+    WalletModule,
+    OrdersModule,
+    PaymentModule,
+    MailModule,
     BasketModule,
     OrderItemModule
+  ],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: CacheInterceptor
+    }
   ]
 })
-export class AppModule {}
+export class AppModule { }

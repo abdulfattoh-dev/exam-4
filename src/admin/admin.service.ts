@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { InjectModel } from '@nestjs/sequelize';
@@ -8,13 +8,22 @@ import { AdminRoles } from 'src/enum';
 import config from 'src/config';
 import { catchError } from 'src/utils/catch-error';
 import { SignInAdminDto } from './dto/sign-in-admin.dto';
-import { JwtService } from '@nestjs/jwt';
+import { TokenService } from 'src/utils/generate-token';
+import { writeToCookie } from 'src/utils/write-cookie';
+import { Response } from 'express';
+import { generateOTP } from 'src/utils/generate-otp';
+import { MailService } from 'src/mail/mail.service';
+import { ConfirmSignInAdminDto } from './dto/confirm-sign-in-admin.dto';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class AdminService implements OnModuleInit {
   constructor(
     @InjectModel(Admin) private model: typeof Admin,
-    private readonly jwtService: JwtService
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private readonly tokenService: TokenService,
+    private readonly mailService: MailService
   ) { }
 
   async onModuleInit(): Promise<void> {
@@ -36,7 +45,7 @@ export class AdminService implements OnModuleInit {
     }
   }
 
-  async create(createAdminDto: CreateAdminDto) {
+  async create(createAdminDto: CreateAdminDto): Promise<object> {
     try {
       const { email, phone_number, password } = createAdminDto;
       const existingEmail = await this.model.findOne({ where: { email } });
@@ -72,7 +81,7 @@ export class AdminService implements OnModuleInit {
     }
   }
 
-  async signIn(signInAdminDto: SignInAdminDto) {
+  async signIn(signInAdminDto: SignInAdminDto): Promise<object> {
     try {
       const { email, password } = signInAdminDto;
       const admin = await this.model.findOne({ where: { email } });
@@ -81,23 +90,55 @@ export class AdminService implements OnModuleInit {
         throw new BadRequestException("Invalid email or password");
       }
 
-      const isMatchPassword = await comparePassword(password, admin.hashed_password);
+      const isMatchPassword = await comparePassword(password, admin.dataValues?.hashed_password);
 
       if (!isMatchPassword) {
         throw new BadRequestException("Invalid email or password");
       }
 
-      const payload = {
-        id: admin.id,
-        role: admin.role,
-        status: admin.status
+      const otp = generateOTP();
+
+      await this.mailService.sentOtp(email, otp);
+      await this.cacheManager.set(email, otp);
+
+      return {
+        statusCode: 200,
+        message: "success",
+        data: email
       }
     } catch (error) {
       return catchError(error);
     }
   }
 
-  async findAll() {
+  async confirmSignIn(confirmSignInAdminDto: ConfirmSignInAdminDto, res: Response): Promise<object> {
+    try {
+      const { email, otp } = confirmSignInAdminDto;
+      const hasAdmin = await this.cacheManager.get(email);
+
+      if (!hasAdmin || hasAdmin != otp) {
+        throw new BadRequestException("OTP expired");
+      }
+
+      const admin = await this.model.findOne({ where: { email } });
+      const { id, role, status } = admin?.dataValues;
+      const payload = { id, role, status }
+      const accessToken = await this.tokenService.generateAccessToken(payload);
+      const refreshToken = await this.tokenService.generateRefreshToken(payload);
+
+      writeToCookie(res, "refreshTokenAdmin", refreshToken);
+
+      return {
+        statusCode: 200,
+        message: "success",
+        data: accessToken
+      }
+    } catch (error) {
+      return catchError(error);
+    }
+  }
+
+  async findAll(): Promise<object> {
     try {
       return this.model.findAll({
         where: { role: ['admin', 'superadmin'] },
@@ -108,7 +149,7 @@ export class AdminService implements OnModuleInit {
     }
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<object> {
     try {
       const admin = await this.model.findByPk(id, {
         attributes: { exclude: ['hashed_password'] },
@@ -128,7 +169,7 @@ export class AdminService implements OnModuleInit {
     }
   }
 
-  async update(id: number, updateAdminDto: UpdateAdminDto) {
+  async update(id: number, updateAdminDto: UpdateAdminDto): Promise<object> {
     try {
       const admin = await this.model.findByPk(id);
 
@@ -164,7 +205,7 @@ export class AdminService implements OnModuleInit {
     }
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<object> {
     try {
       const admin = await this.model.findByPk(id);
 

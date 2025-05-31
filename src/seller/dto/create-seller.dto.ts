@@ -6,10 +6,10 @@ import {
   IsStrongPassword,
 } from 'class-validator';
 
-export class CreateUserDto {
-  @IsNotEmpty()
-  @IsString()
-  full_name: string;
+export class CreateSellerDto {
+    @IsNotEmpty()
+    @IsString()
+    full_name: string;
 
   @IsNotEmpty()
   @IsEmail()

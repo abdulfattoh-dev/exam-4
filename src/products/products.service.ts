@@ -27,7 +27,7 @@ export class ProductsService {
 
   async findAll(): Promise<object> {
     try {
-      const products = await this.productModel.findAll();
+      const products = await this.productModel.findAll({include: {all: true}});
       if(!products?.length) {
         throw new NotFoundException('Products not found');
       }
@@ -43,7 +43,7 @@ export class ProductsService {
 
   async findOne(id: number): Promise<object> {
     try {
-      const product = await this.productModel.findByPk(id);
+      const product = await this.productModel.findByPk(id, {include: {all: true}});
       if (!product) {
         throw new NotFoundException('Product id not found');
       }

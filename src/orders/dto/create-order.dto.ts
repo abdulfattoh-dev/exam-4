@@ -5,25 +5,25 @@ export class CreateOrderDto {
     // @IsNumber()
     // user_id: number
 
-    @IsNotEmpty()
     @IsString()
+    @IsNotEmpty()
     items: string
 
-    @IsNotEmpty()
     @IsNumber()
+    @IsNotEmpty()
     total_price: number
 
-    @IsNotEmpty()
     @IsString()
+    @IsNotEmpty()
     address: string
 
 
-    @IsNotEmpty()
     @IsString()
+    @IsNotEmpty()
     city: string
 
-    @IsNotEmpty()
     @IsPhoneNumber('UZ')
+    @IsNotEmpty()
     phoneNumber: string
 
     @IsString()

@@ -25,5 +25,5 @@ export class CreateSellerDto {
 
   @IsNotEmpty()
   @IsString()
-  addess: string;
+  address: string;
 }

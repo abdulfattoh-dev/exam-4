@@ -19,5 +19,6 @@ export default {
     ADMIN_FULL_NAME: String(process.env.ADMIN_FULL_NAME),
     ADMIN_EMAIL: String(process.env.ADMIN_EMAIL),
     ADMIN_PHONE: String(process.env.ADMIN_PHONE),
-    ADMIN_PASSWORD: String(process.env.ADMIN_PASSWORD)
+    ADMIN_PASSWORD: String(process.env.ADMIN_PASSWORD),
+    BASE_URL: String(process.env.BASE_URL)
 }

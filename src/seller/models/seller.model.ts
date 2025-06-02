@@ -1,5 +1,6 @@
-import { Column, DataType, Model, Table } from "sequelize-typescript";
+import { Column, DataType, HasMany, Model, Table } from "sequelize-typescript";
 import { Status, UserRoles } from "src/enum";
+import { Product } from "src/products/models/product.model";
 
 @Table({ tableName: "users" })
 export class Seller extends Model {
@@ -46,4 +47,7 @@ export class Seller extends Model {
         defaultValue: Status.ACTIVE
     })
     status: string;
+
+    @HasMany(() => Product)
+    products: Product[]
 }

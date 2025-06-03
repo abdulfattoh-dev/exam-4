@@ -52,13 +52,12 @@ export class Product extends Model {
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE'
     })
-
     category: Category
-    // @Column({
-    //     type: DataType.STRING,
-    //     allowNull: false 
-    // })
-    // image: string
+    
+    @Column({
+        type: DataType.STRING,
+    })
+    image: string
 
    
 }

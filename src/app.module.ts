@@ -25,6 +25,8 @@ import { BasketModule } from './basket/basket.module';
 import { OrderItemModule } from './order-item/order-item.module';
 import { Basket } from './basket/model/basket.model';
 import { OrderItem } from './order-item/model/order-item.model';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { resolve } from 'path';
 
 @Module({
   imports: [
@@ -45,6 +47,10 @@ import { OrderItem } from './order-item/model/order-item.model';
     }),
     CacheModule.register({
       isGlobal: true
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: resolve(__dirname, '..', '..', 'uploads'),
+      serveRoot: '/uploads'
     }),
     ProductsModule,
     CategoriesModule,

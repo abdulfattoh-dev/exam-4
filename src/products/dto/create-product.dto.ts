@@ -8,11 +8,22 @@ export class CreateProductDto {
     @IsString()
     description: string;
 
-    @IsDecimal()
+    @IsNumber()
     @IsNotEmpty()
     price: number;
 
     @IsNotEmpty()
     @IsNumber()
     quantity: number;
+    
+    @IsNumber()
+    @IsNotEmpty()
+    seller_id: number;
+ 
+
+    @IsNumber()
+    @IsNotEmpty()
+    category_id: number;
+
+
 }

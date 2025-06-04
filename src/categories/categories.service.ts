@@ -40,8 +40,7 @@ export class CategoriesService {
       return catchError(error)
     }
 
-  }
-
+  }f
   async findOne(id: number): Promise<object> {
     try {
       const categories = await this.categoryModel.findByPk(id);

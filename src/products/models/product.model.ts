@@ -1,4 +1,5 @@
 import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from "sequelize-typescript";
+import { Category } from "src/categories/models/category.model";
 import { Seller } from "src/seller/models/seller.model";
 
 
@@ -28,21 +29,31 @@ export class Product extends Model {
     quantity: number
 
 
-    // @ForeignKey(() => Seller)
-    // @Column({
-    //     type: DataType.INTEGER,
-    //     allowNull: false
-    // })
-    // seller_id: number
+    @ForeignKey(() => Seller)
+    @Column({
+        type: DataType.INTEGER,
+        allowNull: false
+    })
+    seller_id: number
+    @BelongsTo(()=> Seller,{
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
+    })
+    seller: Seller
+
 
     
-    // @ForeignKey(() => Category)
-    // @Column({
-    //     type: DataType.INTEGER,
-    //     allowNull: false
-    // })
-    // category_id: number;
-    // @BelongsTo(() => Category)
+    @ForeignKey(() => Category)
+    @Column({
+        type: DataType.INTEGER,
+        allowNull: false
+    })
+    category_id: number;
+    @BelongsTo(() => Category, {
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
+    })
+    category: Category
 
     // @Column({
     //     type: DataType.STRING,

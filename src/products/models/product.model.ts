@@ -1,3 +1,4 @@
+import { Type } from "class-transformer";
 import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from "sequelize-typescript";
 import { Category } from "src/categories/models/category.model";
 import { Seller } from "src/seller/models/seller.model";
@@ -56,6 +57,7 @@ export class Product extends Model {
     
     @Column({
         type: DataType.STRING,
+        allowNull: false
     })
     image: string
 

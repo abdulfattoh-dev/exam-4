@@ -3,7 +3,6 @@ import { Product } from 'src/products/models/product.model';
 
 @Table({ tableName: 'category' })
 export class Category extends Model {
-  
   @Column({
     type: DataType.STRING,
     unique: true,
@@ -13,10 +12,9 @@ export class Category extends Model {
 
   @Column({
     type: DataType.STRING,
-    
   })
   description: string;
 
   @HasMany(() => Product)
-  products: Product[]
+  products: Product[];
 }

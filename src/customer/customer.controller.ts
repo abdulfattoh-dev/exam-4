@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Res,
+} from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
@@ -8,20 +17,23 @@ import { ConfirmSignInCustomerDto } from './dto/confirm-sign-in-customer.dto';
 
 @Controller('customer')
 export class CustomerController {
-  constructor(private readonly customerService: CustomerService) { }
+  constructor(private readonly customerService: CustomerService) {}
 
   @Post()
   create(@Body() createCustomerDto: CreateCustomerDto) {
     return this.customerService.create(createCustomerDto);
   }
 
-  @Post("sign-in")
+  @Post('sign-in')
   async signIn(@Body() signInCustomerDto: SignInCustomerDto) {
     return this.customerService.signIn(signInCustomerDto);
   }
 
-  @Post("confirm-sign-in")
-  async confirmSignIn(@Body() confirmSignInCustomerDto: ConfirmSignInCustomerDto, @Res({ passthrough: true }) res: Response) {
+  @Post('confirm-sign-in')
+  async confirmSignIn(
+    @Body() confirmSignInCustomerDto: ConfirmSignInCustomerDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     return this.customerService.confirmSignIn(confirmSignInCustomerDto, res);
   }
 
@@ -36,7 +48,10 @@ export class CustomerController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCustomerDto: UpdateCustomerDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateCustomerDto: UpdateCustomerDto,
+  ) {
     return this.customerService.update(+id, updateCustomerDto);
   }
 

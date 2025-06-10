@@ -25,7 +25,7 @@ export class WalletService {
   async findAll(): Promise<object> {
     try {
       const wallets = await this.walletModel.findAll();
-      if(!wallets?.length) {
+      if (!wallets?.length) {
         throw new NotFoundException('Products not found');
       }
       return {
@@ -34,38 +34,41 @@ export class WalletService {
         data: wallets,
       };
     } catch (error) {
-      return catchError(error)
+      return catchError(error);
     }
   }
 
   async findOne(id: number): Promise<object> {
     try {
-      const wallet = await this.walletModel.findByPk(id)
-      if(!wallet) {
-        throw new NotFoundException('Wallet not found')
+      const wallet = await this.walletModel.findByPk(id);
+      if (!wallet) {
+        throw new NotFoundException('Wallet not found');
       }
       return {
         statusCode: 200,
         message: 'success',
-        data: wallet
-      }
+        data: wallet,
+      };
     } catch (error) {
-      return catchError(error)
+      return catchError(error);
     }
   }
 
   async update(id: number, updateWalletDto: UpdateWalletDto): Promise<object> {
     try {
       const walletId = await this.walletModel.findByPk(id);
-      if(!walletId){
-        throw new NotFoundException('Wallet id not found!')
+      if (!walletId) {
+        throw new NotFoundException('Wallet id not found!');
       }
-      const newWallet = await this.walletModel.update(updateWalletDto, {where: {id}, returning: true})
+      const newWallet = await this.walletModel.update(updateWalletDto, {
+        where: { id },
+        returning: true,
+      });
       return {
         statusCode: 200,
         message: 'success',
-        data: newWallet
-      }
+        data: newWallet,
+      };
     } catch (error) {
       return catchError(error);
     }
@@ -74,17 +77,17 @@ export class WalletService {
   async remove(id: number): Promise<object> {
     try {
       const walletId = await this.walletModel.findByPk(id);
-      if(!walletId) {
-        throw new NotFoundException('Wallet id not found')
+      if (!walletId) {
+        throw new NotFoundException('Wallet id not found');
       }
-      await this.walletModel.destroy({where: {id}});
+      await this.walletModel.destroy({ where: { id } });
       return {
         statusCode: 200,
         message: 'success',
-        data: {data: {}}
-      }
+        data: { data: {} },
+      };
     } catch (error) {
-      return catchError(error)
+      return catchError(error);
     }
   }
 }

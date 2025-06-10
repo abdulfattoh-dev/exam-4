@@ -12,7 +12,7 @@ export class PaymentService {
   ) {}
 
   async create(dto: CreatePaymentDto): Promise<Payment> {
-    return this.paymentModel.create({...dto});
+    return this.paymentModel.create({ ...dto });
   }
 
   async findAll(): Promise<Payment[]> {
@@ -20,7 +20,9 @@ export class PaymentService {
   }
 
   async findOne(id: number): Promise<Payment> {
-    const payment = await this.paymentModel.findByPk(id, { include: { all: true } });
+    const payment = await this.paymentModel.findByPk(id, {
+      include: { all: true },
+    });
     if (!payment) throw new NotFoundException('To‘lov topilmadi');
     return payment;
   }

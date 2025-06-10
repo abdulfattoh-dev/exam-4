@@ -7,9 +7,9 @@ import {
 } from 'class-validator';
 
 export class CreateSellerDto {
-    @IsNotEmpty()
-    @IsString()
-    full_name: string;
+  @IsNotEmpty()
+  @IsString()
+  full_name: string;
 
   @IsNotEmpty()
   @IsEmail()

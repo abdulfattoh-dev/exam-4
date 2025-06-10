@@ -1,4 +1,11 @@
-import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+  OnModuleInit,
+} from '@nestjs/common';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { InjectModel } from '@nestjs/sequelize';
@@ -23,12 +30,14 @@ export class AdminService implements OnModuleInit {
     @InjectModel(Admin) private model: typeof Admin,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly tokenService: TokenService,
-    private readonly mailService: MailService
-  ) { }
+    private readonly mailService: MailService,
+  ) {}
 
   async onModuleInit(): Promise<void> {
     try {
-      const existingSuperAdmin = await this.model.findOne({ where: { role: AdminRoles.SUPERADMIN } });
+      const existingSuperAdmin = await this.model.findOne({
+        where: { role: AdminRoles.SUPERADMIN },
+      });
 
       if (!existingSuperAdmin) {
         const hashedPassword = await hashPassword(config.ADMIN_PASSWORD);
@@ -37,7 +46,7 @@ export class AdminService implements OnModuleInit {
           email: config.ADMIN_EMAIL,
           phone_number: config.ADMIN_PHONE,
           hashed_password: hashedPassword,
-          role: AdminRoles.SUPERADMIN
+          role: AdminRoles.SUPERADMIN,
         });
       }
     } catch (error) {
@@ -68,7 +77,7 @@ export class AdminService implements OnModuleInit {
       const admin = await this.model.create({
         ...createAdminDto,
         hashed_password: hashedPassword,
-        attributes: { exclude: ["hashed_password"] }
+        attributes: { exclude: ['hashed_password'] },
       });
 
       return {
@@ -87,13 +96,16 @@ export class AdminService implements OnModuleInit {
       const admin = await this.model.findOne({ where: { email } });
 
       if (!admin) {
-        throw new BadRequestException("Invalid email or password");
+        throw new BadRequestException('Invalid email or password');
       }
 
-      const isMatchPassword = await comparePassword(password, admin.dataValues?.hashed_password);
+      const isMatchPassword = await comparePassword(
+        password,
+        admin.dataValues?.hashed_password,
+      );
 
       if (!isMatchPassword) {
-        throw new BadRequestException("Invalid email or password");
+        throw new BadRequestException('Invalid email or password');
       }
 
       const otp = generateOTP();
@@ -103,36 +115,40 @@ export class AdminService implements OnModuleInit {
 
       return {
         statusCode: 200,
-        message: "success",
-        data: email
-      }
+        message: 'success',
+        data: email,
+      };
     } catch (error) {
       return catchError(error);
     }
   }
 
-  async confirmSignIn(confirmSignInAdminDto: ConfirmSignInAdminDto, res: Response): Promise<object> {
+  async confirmSignIn(
+    confirmSignInAdminDto: ConfirmSignInAdminDto,
+    res: Response,
+  ): Promise<object> {
     try {
       const { email, otp } = confirmSignInAdminDto;
       const hasAdmin = await this.cacheManager.get(email);
 
       if (!hasAdmin || hasAdmin != otp) {
-        throw new BadRequestException("OTP expired");
+        throw new BadRequestException('OTP expired');
       }
 
       const admin = await this.model.findOne({ where: { email } });
       const { id, role, status } = admin?.dataValues;
-      const payload = { id, role, status }
+      const payload = { id, role, status };
       const accessToken = await this.tokenService.generateAccessToken(payload);
-      const refreshToken = await this.tokenService.generateRefreshToken(payload);
+      const refreshToken =
+        await this.tokenService.generateRefreshToken(payload);
 
-      writeToCookie(res, "refreshTokenAdmin", refreshToken);
+      writeToCookie(res, 'refreshTokenAdmin', refreshToken);
 
       return {
         statusCode: 200,
-        message: "success",
-        data: accessToken
-      }
+        message: 'success',
+        data: accessToken,
+      };
     } catch (error) {
       return catchError(error);
     }

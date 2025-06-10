@@ -5,7 +5,6 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Order } from './models/order.model';
 import { catchError } from 'src/utils/catch-error';
 
-
 @Injectable()
 export class OrdersService {
   constructor(@InjectModel(Order) private orderModel: typeof Order) {}
@@ -15,7 +14,7 @@ export class OrdersService {
       return {
         statusCode: 201,
         message: 'success',
-        data: newOrder
+        data: newOrder,
       };
     } catch (error) {
       return catchError(error);
@@ -31,8 +30,8 @@ export class OrdersService {
       return {
         statusCode: 200,
         message: 'success',
-        data: orders
-      }
+        data: orders,
+      };
     } catch (error) {
       return catchError(error);
     }

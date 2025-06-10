@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Res,
+} from '@nestjs/common';
 import { SellerService } from './seller.service';
 import { CreateSellerDto } from './dto/create-seller.dto';
 import { UpdateSellerDto } from './dto/update-seller.dto';
@@ -8,20 +17,23 @@ import { ConfirmSignInSellerDto } from './dto/confirm-sign-in-seller.dto';
 
 @Controller('seller')
 export class SellerController {
-  constructor(private readonly sellerService: SellerService) { }
+  constructor(private readonly sellerService: SellerService) {}
 
   @Post()
   create(@Body() createSellerDto: CreateSellerDto) {
     return this.sellerService.create(createSellerDto);
   }
 
-  @Post("sign-in")
+  @Post('sign-in')
   async signIn(@Body() signInSellerDto: SignInSellerDto) {
     return this.sellerService.signIn(signInSellerDto);
   }
 
-  @Post("confirm-sign-in")
-  async confirmSignIn(@Body() confirmSignInSellerDto: ConfirmSignInSellerDto, @Res({ passthrough: true }) res: Response) {
+  @Post('confirm-sign-in')
+  async confirmSignIn(
+    @Body() confirmSignInSellerDto: ConfirmSignInSellerDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     return this.sellerService.confirmSignIn(confirmSignInSellerDto, res);
   }
 

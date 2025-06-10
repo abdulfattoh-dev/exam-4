@@ -27,11 +27,12 @@ import { Basket } from './basket/model/basket.model';
 import { OrderItem } from './order-item/model/order-item.model';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { resolve } from 'path';
+import { ImagesOfAdmin } from './products/models/image-of-product';
 
 @Module({
   imports: [
     SequelizeModule.forRoot({
-      dialect: "postgres",
+      dialect: 'postgres',
       host: config.PG_HOST,
       port: config.PG_PORT,
       username: config.PG_USER,
@@ -40,17 +41,28 @@ import { resolve } from 'path';
       synchronize: true,
       logging: false,
       autoLoadModels: true,
-      models: [Admin, Customer, Seller, Product, Wallet, Order, Category, Basket, OrderItem]
+      models: [
+        Admin,
+        Customer,
+        Seller,
+        Product,
+        Wallet,
+        Order,
+        Category,
+        Basket,
+        OrderItem,
+        ImagesOfAdmin,
+      ],
     }),
     JwtModule.register({
-      global: true
+      global: true,
     }),
     CacheModule.register({
-      isGlobal: true
+      isGlobal: true,
     }),
     ServeStaticModule.forRoot({
       rootPath: resolve(__dirname, '..', '..', 'uploads'),
-      serveRoot: '/uploads'
+      serveRoot: '/uploads',
     }),
     ProductsModule,
     CategoriesModule,
@@ -63,13 +75,14 @@ import { resolve } from 'path';
     PaymentModule,
     MailModule,
     BasketModule,
-    OrderItemModule
+    OrderItemModule,
+    ImagesOfAdmin,
   ],
   providers: [
     {
       provide: APP_INTERCEPTOR,
-      useClass: CacheInterceptor
-    }
-  ]
+      useClass: CacheInterceptor,
+    },
+  ],
 })
-export class AppModule { }
+export class AppModule {}

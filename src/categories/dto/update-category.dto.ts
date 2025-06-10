@@ -4,11 +4,11 @@ import { Optional } from '@nestjs/common';
 import { IsString } from 'class-validator';
 
 export class UpdateCategoryDto extends PartialType(CreateCategoryDto) {
-    @Optional()
-    @IsString()
-    name: string;
+  @Optional()
+  @IsString()
+  name: string;
 
-    @Optional()
-    @IsString()
-    description: string;
+  @Optional()
+  @IsString()
+  description: string;
 }

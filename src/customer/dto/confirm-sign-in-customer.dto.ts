@@ -1,10 +1,10 @@
-import { IsEmail, IsNotEmpty } from "class-validator";
+import { IsEmail, IsNotEmpty } from 'class-validator';
 
 export class ConfirmSignInCustomerDto {
-    @IsEmail()
-    @IsNotEmpty()
-    email: string;
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
 
-    @IsNotEmpty()
-    otp: string | number;
+  @IsNotEmpty()
+  otp: string | number;
 }

@@ -11,16 +11,16 @@ import config from 'src/config';
         secure: false,
         auth: {
           user: config.MAIL_USER,
-          pass: config.MAIL_PASS
-        }
+          pass: config.MAIL_PASS,
+        },
       },
       defaults: {
-        from: config.MAIL_USER
-      }
-    })
+        from: config.MAIL_USER,
+      },
+    }),
   ],
   controllers: [],
   providers: [MailService],
-  exports: [MailService]
+  exports: [MailService],
 })
-export class MailModule { }
+export class MailModule {}

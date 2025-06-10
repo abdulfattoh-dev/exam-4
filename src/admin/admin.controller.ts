@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res, UseGuards, UseInterceptors } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Res,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
@@ -14,7 +25,7 @@ import { AdminRoles } from 'src/enum';
 @Controller('admin')
 @UseInterceptors(CacheInterceptor)
 export class AdminController {
-  constructor(private readonly adminService: AdminService) { }
+  constructor(private readonly adminService: AdminService) {}
 
   @UseGuards(AuthGuard, RolesGuard)
   @CheckRoles(AdminRoles.SUPERADMIN)
@@ -23,13 +34,16 @@ export class AdminController {
     return this.adminService.create(createAdminDto);
   }
 
-  @Post("sign-in")
+  @Post('sign-in')
   async signIn(@Body() signInAdminDto: SignInAdminDto) {
     return this.adminService.signIn(signInAdminDto);
   }
 
-  @Post("confirm-sign-in")
-  async confirmSignIn(@Body() confirmSignInAdminDto: ConfirmSignInAdminDto, @Res({ passthrough: true }) res: Response) {
+  @Post('confirm-sign-in')
+  async confirmSignIn(
+    @Body() confirmSignInAdminDto: ConfirmSignInAdminDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     return this.adminService.confirmSignIn(confirmSignInAdminDto, res);
   }
 
@@ -44,7 +58,10 @@ export class AdminController {
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateAdminDto: UpdateAdminDto) {
+  async update(
+    @Param('id') id: string,
+    @Body() updateAdminDto: UpdateAdminDto,
+  ) {
     return this.adminService.update(+id, updateAdminDto);
   }
 

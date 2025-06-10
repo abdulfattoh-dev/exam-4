@@ -4,7 +4,7 @@ import { IsEnum, IsOptional } from 'class-validator';
 import { Status } from 'src/enum';
 
 export class UpdateSellerDto extends PartialType(CreateSellerDto) {
-    @IsOptional()
-    @IsEnum([Status.ACTIVE, Status.INACTIVE])
-    status?: string;
+  @IsOptional()
+  @IsEnum([Status.ACTIVE, Status.INACTIVE])
+  status?: string;
 }

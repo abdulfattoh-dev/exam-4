@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Product } from './models/product.model';
 import { InjectModel } from '@nestjs/sequelize';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -6,34 +11,62 @@ import { catchError } from 'src/utils/catch-error';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { FileService } from 'src/file/file.service';
 import { console } from 'inspector';
+import { ImagesOfAdmin } from './models/image-of-product';
+import { Sequelize } from 'sequelize-typescript';
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectModel(Product) private productModel: typeof Product,
+    @InjectModel(ImagesOfAdmin) private imageModel: typeof ImagesOfAdmin,
+    private readonly sequelize: Sequelize,
     private readonly fileService: FileService,
   ) {}
 
   async create(
     createProductDto: CreateProductDto,
-    file?: Express.Multer.File,
-  ): Promise<object> {
+    files?: Express.Multer.File[],
+  ) {
+    const transaction = await this.sequelize.transaction();
     try {
-      let image: undefined | string;
-
-      if (file) {
-        image = await this.fileService.createFile(file);
+      const { seller_id, name } = createProductDto;
+      const existing = await this.productModel.findOne({
+        where: { seller_id, name },
+        transaction,
+      });
+      if (existing) {
+        throw new ConflictException('Product name already exists');
       }
+
       const product = await this.productModel.create({
         ...createProductDto,
-        image,
+        transaction,
+      });
+      const imageUrl: string[] = [];
+      if (files && files.length > 0) {
+        for (let file of files) {
+          imageUrl.push(await this.fileService.createFile(file));
+        }
+        const images = imageUrl.map((image: string) => {
+          return {
+            image_url: image,
+            product_id: product.dataValues.id,
+          };
+        });
+        await this.imageModel.bulkCreate(images, { transaction });
+      }
+      await transaction.commit();
+      const findProduct = await this.productModel.findOne({
+        where: { name },
+        include: { all: true },
       });
       return {
         statusCode: 201,
         message: 'success',
-        data: product,
+        data: findProduct,
       };
     } catch (error) {
+      await transaction.rollback();
       return catchError(error);
     }
   }

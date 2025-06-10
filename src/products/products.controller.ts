@@ -7,23 +7,24 @@ import {
   Param,
   Delete,
   UseInterceptors,
-  UploadedFile,
+  UploadedFiles,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { ImageValidationPipe } from 'src/pipes/image-validation-pipe';
 
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FilesInterceptor('files'))
   @Post()
-  create(@Body() createProductDto: CreateProductDto, 
-    @UploadedFile(new ImageValidationPipe()) file?: Express.Multer.File
-  ) {    
+  create(
+    @Body() createProductDto: CreateProductDto,
+    @UploadedFiles(new ImageValidationPipe()) file?: Express.Multer.File[],
+  ) {
     return this.productsService.create(createProductDto, file);
   }
 

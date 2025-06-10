@@ -9,4 +9,4 @@ import { Basket } from './model/basket.model';
   controllers: [BasketController],
   providers: [BasketService],
 })
-export class BasketModule { }
+export class BasketModule {}

@@ -1,4 +1,10 @@
-import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { InjectModel } from '@nestjs/sequelize';
@@ -22,36 +28,40 @@ export class CustomerService {
     @InjectModel(Customer) private model: typeof Customer,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly tokenService: TokenService,
-    private readonly mailService: MailService
-  ) { }
+    private readonly mailService: MailService,
+  ) {}
 
   async create(createCustomerDto: CreateCustomerDto): Promise<object> {
     try {
-      const { email, phone_number, password, } = createCustomerDto;
+      const { email, phone_number, password } = createCustomerDto;
       const existingEmail = await this.model.findOne({ where: { email } });
 
       if (existingEmail) {
         throw new ConflictException(`Email: ${email} already exists`);
       }
 
-      const existingPhoneNumber = await this.model.findOne({ where: { phone_number } });
+      const existingPhoneNumber = await this.model.findOne({
+        where: { phone_number },
+      });
 
       if (existingPhoneNumber) {
-        throw new ConflictException(`Phone number: ${phone_number} already exists`);
+        throw new ConflictException(
+          `Phone number: ${phone_number} already exists`,
+        );
       }
 
       const hashedPassword = await hashPassword(password);
       const customer = await this.model.create({
         ...createCustomerDto,
         hashed_password: hashedPassword,
-        attributes: { exclude: ["hashed_password"] }
+        attributes: { exclude: ['hashed_password'] },
       });
 
       return {
         statusCode: 201,
-        message: "success",
-        data: customer
-      }
+        message: 'success',
+        data: customer,
+      };
     } catch (error) {
       return catchError(error);
     }
@@ -63,13 +73,16 @@ export class CustomerService {
       const customer = await this.model.findOne({ where: { email } });
 
       if (!customer) {
-        throw new BadRequestException("Invalid email or password");
+        throw new BadRequestException('Invalid email or password');
       }
 
-      const isMatchPassword = await comparePassword(password, customer.dataValues?.hashed_password);
+      const isMatchPassword = await comparePassword(
+        password,
+        customer.dataValues?.hashed_password,
+      );
 
       if (!isMatchPassword) {
-        throw new BadRequestException("Invalid email or password");
+        throw new BadRequestException('Invalid email or password');
       }
 
       const otp = generateOTP();
@@ -79,36 +92,40 @@ export class CustomerService {
 
       return {
         statusCode: 200,
-        message: "success",
-        data: email
-      }
+        message: 'success',
+        data: email,
+      };
     } catch (error) {
       return catchError(error);
     }
   }
 
-  async confirmSignIn(confirmSignInCustomerDto: ConfirmSignInCustomerDto, res: Response): Promise<object> {
+  async confirmSignIn(
+    confirmSignInCustomerDto: ConfirmSignInCustomerDto,
+    res: Response,
+  ): Promise<object> {
     try {
       const { email, otp } = confirmSignInCustomerDto;
       const hasCustomer = await this.cacheManager.get(email);
 
       if (!hasCustomer || hasCustomer != otp) {
-        throw new BadRequestException("OTP expired");
+        throw new BadRequestException('OTP expired');
       }
 
       const customer = await this.model.findOne({ where: { email } });
       const { id, role, status } = customer?.dataValues;
-      const payload = { id, role, status }
+      const payload = { id, role, status };
       const accessToken = await this.tokenService.generateAccessToken(payload);
-      const refreshToken = await this.tokenService.generateRefreshToken(payload);
+      const refreshToken =
+        await this.tokenService.generateRefreshToken(payload);
 
-      writeToCookie(res, "refreshTokenCustomer", refreshToken);
+      writeToCookie(res, 'refreshTokenCustomer', refreshToken);
 
       return {
         statusCode: 200,
-        message: "success",
-        data: accessToken
-      }
+        message: 'success',
+        data: accessToken,
+      };
     } catch (error) {
       return catchError(error);
     }
@@ -116,7 +133,10 @@ export class CustomerService {
 
   async findAll(): Promise<object> {
     try {
-      return this.model.findAll({ where: { role: UserRoles.CUSTOMER }, attributes: { exclude: ["hashed_password"] } });
+      return this.model.findAll({
+        where: { role: UserRoles.CUSTOMER },
+        attributes: { exclude: ['hashed_password'] },
+      });
     } catch (error) {
       return catchError(error);
     }
@@ -124,7 +144,9 @@ export class CustomerService {
 
   async findOne(id: number): Promise<object> {
     try {
-      const customer = await this.model.findByPk(id, { attributes: { exclude: ["hashed_password"] } });
+      const customer = await this.model.findByPk(id, {
+        attributes: { exclude: ['hashed_password'] },
+      });
 
       if (!customer) {
         throw new NotFoundException(`Customer not found by id: ${id}`);
@@ -132,15 +154,18 @@ export class CustomerService {
 
       return {
         statusCode: 200,
-        message: "success",
-        data: customer
-      }
+        message: 'success',
+        data: customer,
+      };
     } catch (error) {
       return catchError(error);
     }
   }
 
-  async update(id: number, updateCustomerDto: UpdateCustomerDto): Promise<object> {
+  async update(
+    id: number,
+    updateCustomerDto: UpdateCustomerDto,
+  ): Promise<object> {
     try {
       const customer = await this.model.findByPk(id);
 
@@ -154,18 +179,23 @@ export class CustomerService {
         updateCustomerDto.password = await hashPassword(password);
       }
 
-      await this.model.update({
-        ...updateCustomerDto,
-        hashed_password: updateCustomerDto.password
-      }, { where: { id } });
+      await this.model.update(
+        {
+          ...updateCustomerDto,
+          hashed_password: updateCustomerDto.password,
+        },
+        { where: { id } },
+      );
 
-      const updatedCustomer = await this.model.findByPk(id, { attributes: { exclude: ["hashed_password"] } });
+      const updatedCustomer = await this.model.findByPk(id, {
+        attributes: { exclude: ['hashed_password'] },
+      });
 
       return {
         statusCode: 200,
-        message: "success",
-        data: updatedCustomer
-      }
+        message: 'success',
+        data: updatedCustomer,
+      };
     } catch (error) {
       return catchError(error);
     }
@@ -183,9 +213,9 @@ export class CustomerService {
 
       return {
         statusCode: 200,
-        message: "success",
-        data: {}
-      }
+        message: 'success',
+        data: {},
+      };
     } catch (error) {
       return catchError(error);
     }

@@ -1,4 +1,11 @@
-import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from 'sequelize-typescript';
+import {
+  Table,
+  Column,
+  Model,
+  DataType,
+  ForeignKey,
+  BelongsTo,
+} from 'sequelize-typescript';
 import { Order } from 'src/orders/models/order.model';
 import { Wallet } from 'src/wallet/models/wallet.model';
 

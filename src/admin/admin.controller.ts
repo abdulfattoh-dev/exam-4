@@ -21,6 +21,7 @@ import { ConfirmSignInAdminDto } from './dto/confirm-sign-in-admin.dto';
 import { RolesGuard } from 'src/guards/role.guard';
 import { CheckRoles } from 'src/decorators/role.decorator';
 import { AdminRoles } from 'src/enum';
+import { SelfGuard } from 'src/guards/self.guard';
 
 @Controller('admin')
 @UseInterceptors(CacheInterceptor)
@@ -47,16 +48,22 @@ export class AdminController {
     return this.adminService.confirmSignIn(confirmSignInAdminDto, res);
   }
 
+  @UseGuards(AuthGuard, RolesGuard)
+  @CheckRoles(AdminRoles.SUPERADMIN)
   @Get()
   async findAll() {
     return this.adminService.findAll();
   }
 
+  @UseGuards(AuthGuard, SelfGuard)
+  @CheckRoles(AdminRoles.SUPERADMIN, AdminRoles.ADMIN)
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.adminService.findOne(+id);
   }
 
+  @UseGuards(AuthGuard, SelfGuard)
+  @CheckRoles(AdminRoles.SUPERADMIN, AdminRoles.ADMIN)
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -65,6 +72,8 @@ export class AdminController {
     return this.adminService.update(+id, updateAdminDto);
   }
 
+  @UseGuards(AuthGuard, SelfGuard)
+  @CheckRoles(AdminRoles.SUPERADMIN)
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return this.adminService.remove(+id);

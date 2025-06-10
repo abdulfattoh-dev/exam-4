@@ -1,4 +1,10 @@
-import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateSellerDto } from './dto/create-seller.dto';
 import { UpdateSellerDto } from './dto/update-seller.dto';
 import { InjectModel } from '@nestjs/sequelize';
@@ -22,36 +28,40 @@ export class SellerService {
     @InjectModel(Seller) private model: typeof Seller,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly tokenService: TokenService,
-    private readonly mailService: MailService
-  ) { }
+    private readonly mailService: MailService,
+  ) {}
 
   async create(createSellerDto: CreateSellerDto) {
     try {
-      const { email, phone_number, password, } = createSellerDto;
+      const { email, phone_number, password } = createSellerDto;
       const existingEmail = await this.model.findOne({ where: { email } });
 
       if (existingEmail) {
         throw new ConflictException(`Email: ${email} already exists`);
       }
 
-      const existingPhoneNumber = await this.model.findOne({ where: { phone_number } });
+      const existingPhoneNumber = await this.model.findOne({
+        where: { phone_number },
+      });
 
       if (existingPhoneNumber) {
-        throw new ConflictException(`Phone number: ${phone_number} already exists`);
+        throw new ConflictException(
+          `Phone number: ${phone_number} already exists`,
+        );
       }
 
       const hashedPassword = await hashPassword(password);
       const seller = await this.model.create({
         ...createSellerDto,
         hashed_password: hashedPassword,
-        attributes: { exclude: ["hashed_password"] }
+        attributes: { exclude: ['hashed_password'] },
       });
 
       return {
         statusCode: 201,
-        message: "success",
-        data: seller
-      }
+        message: 'success',
+        data: seller,
+      };
     } catch (error) {
       return catchError(error);
     }
@@ -63,13 +73,16 @@ export class SellerService {
       const seller = await this.model.findOne({ where: { email } });
 
       if (!seller) {
-        throw new BadRequestException("Invalid email or password");
+        throw new BadRequestException('Invalid email or password');
       }
 
-      const isMatchPassword = await comparePassword(password, seller.dataValues?.hashed_password);
+      const isMatchPassword = await comparePassword(
+        password,
+        seller.dataValues?.hashed_password,
+      );
 
       if (!isMatchPassword) {
-        throw new BadRequestException("Invalid email or password");
+        throw new BadRequestException('Invalid email or password');
       }
 
       const otp = generateOTP();
@@ -79,36 +92,40 @@ export class SellerService {
 
       return {
         statusCode: 200,
-        message: "success",
-        data: email
-      }
+        message: 'success',
+        data: email,
+      };
     } catch (error) {
       return catchError(error);
     }
   }
 
-  async confirmSignIn(confirmSignInSellerDto: ConfirmSignInSellerDto, res: Response): Promise<object> {
+  async confirmSignIn(
+    confirmSignInSellerDto: ConfirmSignInSellerDto,
+    res: Response,
+  ): Promise<object> {
     try {
       const { email, otp } = confirmSignInSellerDto;
       const hasSeller = await this.cacheManager.get(email);
 
       if (!hasSeller || hasSeller != otp) {
-        throw new BadRequestException("OTP expired");
+        throw new BadRequestException('OTP expired');
       }
 
       const seller = await this.model.findOne({ where: { email } });
       const { id, role, status } = seller?.dataValues;
-      const payload = { id, role, status }
+      const payload = { id, role, status };
       const accessToken = await this.tokenService.generateAccessToken(payload);
-      const refreshToken = await this.tokenService.generateRefreshToken(payload);
+      const refreshToken =
+        await this.tokenService.generateRefreshToken(payload);
 
-      writeToCookie(res, "refreshTokenSeller", refreshToken);
+      writeToCookie(res, 'refreshTokenSeller', refreshToken);
 
       return {
         statusCode: 200,
-        message: "success",
-        data: accessToken
-      }
+        message: 'success',
+        data: accessToken,
+      };
     } catch (error) {
       return catchError(error);
     }
@@ -116,7 +133,11 @@ export class SellerService {
 
   async findAll() {
     try {
-      return this.model.findAll({ where: { role: UserRoles.SELLER }, attributes: { exclude: ["hashed_password"] } });
+      return this.model.findAll({
+        where: { role: UserRoles.SELLER },
+        attributes: { exclude: ['hashed_password'] },
+        include: { all: true },
+      });
     } catch (error) {
       return catchError(error);
     }
@@ -124,7 +145,10 @@ export class SellerService {
 
   async findOne(id: number) {
     try {
-      const seller = await this.model.findByPk(id, { attributes: { exclude: ["hashed_password"] } });
+      const seller = await this.model.findByPk(id, {
+        attributes: { exclude: ['hashed_password'] },
+        include: { all: true },
+      });
 
       if (!seller) {
         throw new NotFoundException(`Seller not found by id: ${id}`);
@@ -132,9 +156,9 @@ export class SellerService {
 
       return {
         statusCode: 200,
-        message: "success",
-        data: seller
-      }
+        message: 'success',
+        data: seller,
+      };
     } catch (error) {
       return catchError(error);
     }
@@ -154,18 +178,23 @@ export class SellerService {
         updateSellerDto.password = await hashPassword(password);
       }
 
-      await this.model.update({
-        ...updateSellerDto,
-        hashed_password: updateSellerDto.password
-      }, { where: { id } });
+      await this.model.update(
+        {
+          ...updateSellerDto,
+          hashed_password: updateSellerDto.password,
+        },
+        { where: { id } },
+      );
 
-      const updatedSeller = await this.model.findByPk(id, { attributes: { exclude: ["hashed_password"] } });
+      const updatedSeller = await this.model.findByPk(id, {
+        attributes: { exclude: ['hashed_password'] },
+      });
 
       return {
         statusCode: 200,
-        message: "success",
-        data: updatedSeller
-      }
+        message: 'success',
+        data: updatedSeller,
+      };
     } catch (error) {
       return catchError(error);
     }
@@ -183,9 +212,9 @@ export class SellerService {
 
       return {
         statusCode: 200,
-        message: "success",
-        data: {}
-      }
+        message: 'success',
+        data: {},
+      };
     } catch (error) {
       return catchError(error);
     }

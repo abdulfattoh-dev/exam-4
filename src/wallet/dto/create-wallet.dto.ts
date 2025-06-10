@@ -7,5 +7,5 @@ export class CreateWalletDto {
 
   @IsNotEmpty()
   @IsString()
-  card: string
+  card: string;
 }

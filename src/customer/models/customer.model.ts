@@ -1,13 +1,14 @@
-import { Column, DataType, Model, Table } from 'sequelize-typescript';
+import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
 import { Status, UserRoles } from 'src/enum';
+import { Review } from 'src/reviews/models/review.model';
 
-@Table({ tableName: "users" })
+@Table({ tableName: 'users' })
 export class Customer extends Model {
-    @Column({
-        type: DataType.STRING,
-        allowNull: false
-    })
-    full_name: string;
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  full_name: string;
 
   @Column({
     type: DataType.STRING,
@@ -35,15 +36,18 @@ export class Customer extends Model {
   })
   address: string;
 
-    @Column({
-        type: DataType.ENUM(UserRoles.CUSTOMER, UserRoles.SELLER),
-        defaultValue: UserRoles.CUSTOMER
-    })
-    role: string;
+  @Column({
+    type: DataType.ENUM(UserRoles.CUSTOMER, UserRoles.SELLER),
+    defaultValue: UserRoles.CUSTOMER,
+  })
+  role: string;
 
   @Column({
     type: DataType.ENUM(Status.ACTIVE, Status.INACTIVE),
     defaultValue: Status.ACTIVE,
   })
   status: string;
+
+  @HasMany(() => Review)
+  reviews: Review[];
 }

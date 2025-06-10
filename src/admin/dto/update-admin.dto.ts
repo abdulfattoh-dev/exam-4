@@ -4,7 +4,7 @@ import { IsEnum, IsOptional } from 'class-validator';
 import { Status } from 'src/enum';
 
 export class UpdateAdminDto extends PartialType(CreateAdminDto) {
-  @IsOptional()
   @IsEnum([Status.ACTIVE, Status.INACTIVE])
+  @IsOptional()
   status?: string;
 }

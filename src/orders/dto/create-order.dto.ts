@@ -1,35 +1,40 @@
-import { IsNotEmpty, IsNumber, IsString, IsDecimal, IsPhoneNumber } from "class-validator";
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  IsDecimal,
+  IsPhoneNumber,
+} from 'class-validator';
 
 export class CreateOrderDto {
-    // @IsNotEmpty()
-    // @IsNumber()
-    // user_id: number
+  @IsNotEmpty()
+  @IsNumber()
+  customer_id: number;
 
-    @IsNotEmpty()
-    @IsString()
-    items: string
+  @IsNotEmpty()
+  @IsString()
+  items: string;
 
-    @IsNotEmpty()
-    @IsNumber()
-    total_price: number
+  @IsNotEmpty()
+  @IsNumber()
+  total_price: number;
 
-    @IsNotEmpty()
-    @IsString()
-    address: string
+  @IsNotEmpty()
+  @IsString()
+  address: string;
 
+  @IsNotEmpty()
+  @IsString()
+  city: string;
 
-    @IsNotEmpty()
-    @IsString()
-    city: string
+  @IsNotEmpty()
+  @IsPhoneNumber('UZ')
+  phoneNumber: string;
 
-    @IsNotEmpty()
-    @IsPhoneNumber('UZ')
-    phoneNumber: string
+  @IsString()
+  delivery: string;
 
-    @IsString()
-    delivery: string  
-    
-    @IsString()
-    @IsNotEmpty()
-    status: string
+  @IsString()
+  @IsNotEmpty()
+  status: string;
 }

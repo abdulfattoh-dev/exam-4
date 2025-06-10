@@ -1,4 +1,12 @@
-import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+  OnModuleInit,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { InjectModel } from '@nestjs/sequelize';
@@ -16,6 +24,8 @@ import { MailService } from 'src/mail/mail.service';
 import { ConfirmSignInAdminDto } from './dto/confirm-sign-in-admin.dto';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
+import { successRes } from 'src/helpers/success-response';
+import { StatusAdminDto } from './dto/status.admin.dto';
 
 @Injectable()
 export class AdminService implements OnModuleInit {
@@ -23,12 +33,14 @@ export class AdminService implements OnModuleInit {
     @InjectModel(Admin) private model: typeof Admin,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly tokenService: TokenService,
-    private readonly mailService: MailService
-  ) { }
+    private readonly mailService: MailService,
+  ) {}
 
   async onModuleInit(): Promise<void> {
     try {
-      const existingSuperAdmin = await this.model.findOne({ where: { role: AdminRoles.SUPERADMIN } });
+      const existingSuperAdmin = await this.model.findOne({
+        where: { role: AdminRoles.SUPERADMIN },
+      });
 
       if (!existingSuperAdmin) {
         const hashedPassword = await hashPassword(config.ADMIN_PASSWORD);
@@ -37,7 +49,7 @@ export class AdminService implements OnModuleInit {
           email: config.ADMIN_EMAIL,
           phone_number: config.ADMIN_PHONE,
           hashed_password: hashedPassword,
-          role: AdminRoles.SUPERADMIN
+          role: AdminRoles.SUPERADMIN,
         });
       }
     } catch (error) {
@@ -68,14 +80,10 @@ export class AdminService implements OnModuleInit {
       const admin = await this.model.create({
         ...createAdminDto,
         hashed_password: hashedPassword,
-        attributes: { exclude: ["hashed_password"] }
+        attributes: { exclude: ['hashed_password'] },
       });
 
-      return {
-        statusCode: 201,
-        message: 'success',
-        data: admin,
-      };
+      return successRes(admin);
     } catch (error) {
       return catchError(error);
     }
@@ -87,13 +95,16 @@ export class AdminService implements OnModuleInit {
       const admin = await this.model.findOne({ where: { email } });
 
       if (!admin) {
-        throw new BadRequestException("Invalid email or password");
+        throw new BadRequestException('Invalid email or password');
       }
 
-      const isMatchPassword = await comparePassword(password, admin.dataValues?.hashed_password);
+      const isMatchPassword = await comparePassword(
+        password,
+        admin.dataValues?.hashed_password,
+      );
 
       if (!isMatchPassword) {
-        throw new BadRequestException("Invalid email or password");
+        throw new BadRequestException('Invalid email or password');
       }
 
       const otp = generateOTP();
@@ -103,36 +114,73 @@ export class AdminService implements OnModuleInit {
 
       return {
         statusCode: 200,
-        message: "success",
-        data: email
-      }
+        message: 'success',
+        data: email,
+      };
     } catch (error) {
       return catchError(error);
     }
   }
 
-  async confirmSignIn(confirmSignInAdminDto: ConfirmSignInAdminDto, res: Response): Promise<object> {
+  async confirmSignIn(
+    confirmSignInAdminDto: ConfirmSignInAdminDto,
+    res: Response,
+  ): Promise<object> {
     try {
       const { email, otp } = confirmSignInAdminDto;
       const hasAdmin = await this.cacheManager.get(email);
 
       if (!hasAdmin || hasAdmin != otp) {
-        throw new BadRequestException("OTP expired");
+        throw new BadRequestException('OTP expired');
       }
 
       const admin = await this.model.findOne({ where: { email } });
       const { id, role, status } = admin?.dataValues;
-      const payload = { id, role, status }
+      const payload = { id, role, status };
       const accessToken = await this.tokenService.generateAccessToken(payload);
-      const refreshToken = await this.tokenService.generateRefreshToken(payload);
+      const refreshToken =
+        await this.tokenService.generateRefreshToken(payload);
 
-      writeToCookie(res, "refreshTokenAdmin", refreshToken);
+      writeToCookie(res, 'refreshTokenAdmin', refreshToken);
 
-      return {
-        statusCode: 200,
-        message: "success",
-        data: accessToken
+      return successRes({ token: accessToken });
+    } catch (error) {
+      return catchError(error);
+    }
+  }
+
+  async refreshToken(refreshToken: string): Promise<object> {
+    try {
+      const decodedToken =
+        await this.tokenService.verifyRefreshToken(refreshToken);
+
+      if (!decodedToken) {
+        throw new UnauthorizedException('Refresh token expired');
       }
+
+      const admin = await this.findById(decodedToken.id);
+      const payload = {
+        id: admin.id,
+        role: admin.role,
+        status: admin.status,
+      };
+      const accessToken = await this.tokenService.generateAccessToken(payload);
+
+      return successRes({ token: accessToken });
+    } catch (error) {
+      return catchError(error);
+    }
+  }
+
+  async signOut(refreshToken: string, res: Response): Promise<object> {
+    try {
+      const decodedToken =
+        await this.tokenService.verifyRefreshToken(refreshToken);
+
+      await this.findById(decodedToken?.id);
+      res.clearCookie('refreshTokenAdmin');
+
+      return successRes({ message: 'Admin signed out succcesfully' });
     } catch (error) {
       return catchError(error);
     }
@@ -140,10 +188,12 @@ export class AdminService implements OnModuleInit {
 
   async findAll(): Promise<object> {
     try {
-      return this.model.findAll({
+      const admins = await this.model.findAll({
         where: { role: ['admin', 'superadmin'] },
         attributes: { exclude: ['hashed_password'] },
       });
+
+      return successRes(admins);
     } catch (error) {
       return catchError(error);
     }
@@ -159,11 +209,7 @@ export class AdminService implements OnModuleInit {
         throw new NotFoundException(`Admin not found by id: ${id}`);
       }
 
-      return {
-        statusCode: 200,
-        message: 'success',
-        data: admin,
-      };
+      return successRes(admin);
     } catch (error) {
       return catchError(error);
     }
@@ -195,11 +241,23 @@ export class AdminService implements OnModuleInit {
         attributes: { exclude: ['hashed_password'] },
       });
 
-      return {
-        statusCode: 200,
-        message: 'success',
-        data: updatedAdmin,
-      };
+      return successRes(updatedAdmin);
+    } catch (error) {
+      return catchError(error);
+    }
+  }
+
+  async status(id: number, statusDto: StatusAdminDto): Promise<object> {
+    try {
+      await this.findById(id);
+      const updatedAdmin = await this.model.update(
+        {
+          status: statusDto.status,
+        },
+        { where: { id }, returning: true },
+      );
+
+      return successRes(updatedAdmin[1][0]);
     } catch (error) {
       return catchError(error);
     }
@@ -219,11 +277,21 @@ export class AdminService implements OnModuleInit {
 
       await this.model.destroy({ where: { id } });
 
-      return {
-        statusCode: 200,
-        message: 'success',
-        data: {},
-      };
+      return successRes({ message: 'Admin deleted successfully' });
+    } catch (error) {
+      return catchError(error);
+    }
+  }
+
+  async findById(id: number) {
+    try {
+      const admin = await this.model.findByPk(id);
+
+      if (!admin) {
+        throw new NotFoundException(`Admin not found by id: ${id}`);
+      }
+
+      return admin.dataValues;
     } catch (error) {
       return catchError(error);
     }

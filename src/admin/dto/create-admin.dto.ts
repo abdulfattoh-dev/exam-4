@@ -7,19 +7,19 @@ import {
 } from 'class-validator';
 
 export class CreateAdminDto {
-  @IsNotEmpty()
   @IsString()
+  @IsNotEmpty()
   full_name: string;
 
-  @IsNotEmpty()
   @IsEmail()
+  @IsNotEmpty()
   email: string;
 
-  @IsNotEmpty()
   @IsPhoneNumber('UZ')
+  @IsNotEmpty()
   phone_number: string;
 
-  @IsNotEmpty()
   @IsStrongPassword()
+  @IsNotEmpty()
   password: string;
 }

@@ -7,11 +7,8 @@ import { TokenService } from 'src/utils/generate-token';
 import { MailModule } from 'src/mail/mail.module';
 
 @Module({
-  imports: [
-    SequelizeModule.forFeature([Seller]),
-    MailModule
-  ],
+  imports: [SequelizeModule.forFeature([Seller]), MailModule],
   controllers: [SellerController],
   providers: [SellerService, TokenService],
 })
-export class SellerModule { }
+export class SellerModule {}

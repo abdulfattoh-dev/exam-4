@@ -1,6 +1,15 @@
-import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
+import {
+  Column,
+  DataType,
+  HasMany,
+  HasOne,
+  Model,
+  Table,
+} from 'sequelize-typescript';
 import { Status, UserRoles } from 'src/enum';
 import { Review } from 'src/reviews/models/review.model';
+import { Order } from 'src/orders/models/order.model';
+import { Wallet } from 'src/wallet/models/wallet.model';
 
 @Table({ tableName: 'users' })
 export class Customer extends Model {
@@ -50,4 +59,10 @@ export class Customer extends Model {
 
   @HasMany(() => Review)
   reviews: Review[];
+
+  @HasMany(() => Order)
+  order: Order;
+
+  @HasOne(() => Wallet)
+  wallet: Wallet;
 }

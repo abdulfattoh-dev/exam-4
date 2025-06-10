@@ -9,17 +9,24 @@ import {
   UseInterceptors,
   ParseIntPipe,
   UploadedFiles,
+  UseGuards,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { ImageValidationPipe } from 'src/pipes/image-validation.pipe';
+import { ImageValidationPipe } from 'src/pipes/image-validation-pipe';
+import { AuthGuard } from 'src/guards/auth.guard';
+import { RolesGuard } from 'src/guards/role.guard';
+import { CheckRoles } from 'src/decorators/role.decorator';
+import { AdminRoles, UserRoles } from 'src/enum';
 
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
+  @UseGuards(AuthGuard, RolesGuard)
+  @CheckRoles(AdminRoles.SUPERADMIN, AdminRoles.ADMIN, UserRoles.SELLER)
   @UseInterceptors(FilesInterceptor('files'))
   @Post()
   create(
@@ -40,6 +47,8 @@ export class ProductsController {
   }
 
   @UseInterceptors(FilesInterceptor('files'))
+  @UseGuards(AuthGuard, RolesGuard)
+  @CheckRoles(AdminRoles.SUPERADMIN, AdminRoles.ADMIN, UserRoles.SELLER)
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
@@ -49,6 +58,8 @@ export class ProductsController {
     return this.productsService.update(id, updateProductDto, files);
   }
 
+  @UseGuards(AuthGuard, RolesGuard)
+  @CheckRoles(AdminRoles.SUPERADMIN, AdminRoles.ADMIN, UserRoles.SELLER)
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.productsService.remove(id);

@@ -33,18 +33,16 @@ export class FileService {
     }
   }
 
-  async deleteFile(fileName: string) {
+  async deleteFile(fileName: string): Promise<void> {
     try {
+      fileName = fileName.split(config.BASE_URL)[1];
       const file = resolve(this.filePath, fileName);
-
       if (!existsSync(file)) {
         throw new BadRequestException(`File does not exist: ${fileName}`);
       }
-
       await new Promise<void>((res, rej) => {
         unlink(file, (err) => {
           if (err) rej(err);
-
           res();
         });
       });

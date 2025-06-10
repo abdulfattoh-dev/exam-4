@@ -1,11 +1,11 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateWalletDto {
-  @IsNotEmpty()
   @IsString()
+  @IsNotEmpty()
   type: string;
 
-  @IsNotEmpty()
   @IsString()
+  @IsNotEmpty()
   card: string;
 }

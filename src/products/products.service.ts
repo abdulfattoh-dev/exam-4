@@ -6,7 +6,6 @@ import { catchError } from 'src/utils/catch-error';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { FileService } from 'src/file/file.service';
 import { successRes } from 'src/helpers/success-response';
-import config from 'src/config';
 import { ImagesOfProduct } from './models/images-of-product.model';
 import { Sequelize } from 'sequelize-typescript';
 
@@ -14,8 +13,7 @@ import { Sequelize } from 'sequelize-typescript';
 export class ProductsService {
   constructor(
     @InjectModel(Product) private productModel: typeof Product,
-    @InjectModel(ImagesOfProduct)
-    private imageOfProduct: typeof ImagesOfProduct,
+    @InjectModel(ImagesOfProduct) private imageOfProduct: typeof ImagesOfProduct,
     private readonly sequelize: Sequelize,
     private readonly fileService: FileService,
   ) {}

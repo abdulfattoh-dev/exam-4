@@ -2,7 +2,6 @@ import {
   IsNotEmpty,
   IsNumber,
   IsString,
-  IsDecimal,
   IsPhoneNumber,
 } from 'class-validator';
 

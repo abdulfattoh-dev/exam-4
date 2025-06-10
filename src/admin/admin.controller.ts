@@ -72,6 +72,7 @@ export class AdminController {
   }
 
   @UseGuards(AuthGuard, SelfGuard)
+  @CheckRoles(AdminRoles.SUPERADMIN, AdminRoles.ADMIN)
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return this.adminService.findOne(id);
@@ -85,6 +86,8 @@ export class AdminController {
     return this.adminService.status(id, statusDto);
   }
 
+  @UseGuards(AuthGuard, SelfGuard)
+  @CheckRoles(AdminRoles.SUPERADMIN, AdminRoles.ADMIN)
   @Patch(':id')
   async update(
     @Param('id', ParseIntPipe) id: number,
@@ -93,6 +96,8 @@ export class AdminController {
     return this.adminService.update(id, updateAdminDto);
   }
 
+  @UseGuards(AuthGuard, SelfGuard)
+  @CheckRoles(AdminRoles.SUPERADMIN)
   @Delete(':id')
   async remove(@Param('id', ParseIntPipe) id: number) {
     return this.adminService.remove(id);

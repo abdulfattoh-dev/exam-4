@@ -1,12 +1,33 @@
-import { Column, DataType, Model, Table } from 'sequelize-typescript';
+import {
+  BelongsTo,
+  Column,
+  DataType,
+  ForeignKey,
+  Model,
+  Table,
+} from 'sequelize-typescript';
+import { Customer } from 'src/customer/models/customer.model';
 
 @Table({ tableName: 'orders' })
 export class Order extends Model {
+  @ForeignKey(() => Customer)
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
   })
   customer_id: number;
+
+  @BelongsTo(() => Customer, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  customer: Customer;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  items: string;
 
   @Column({
     type: DataType.INTEGER,
@@ -33,21 +54,19 @@ export class Order extends Model {
   phoneNumber: string;
 
   @Column({
-    type: DataType.ENUM('yourself', 'delivery'),
-    allowNull: false,
+    type: DataType.ENUM('mail', 'delivery'),
   })
   delivery: string;
 
   @Column({
     type: DataType.ENUM(
-      'Accepted',
+      'Accepted Order',
       'Preparing',
       'Delivering',
       'Delivered',
       'Closed',
     ),
     allowNull: false,
-    defaultValue: 'Accepted',
   })
   status: string;
 }

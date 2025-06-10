@@ -67,6 +67,10 @@ import { ImagesOfProduct } from './products/models/images-of-product.model';
     CacheModule.register({
       isGlobal: true,
     }),
+    ServeStaticModule.forRoot({
+      rootPath: resolve(__dirname, '..', '..', 'uploads'),
+      serveRoot: '/uploads',
+    }),
     ProductsModule,
     CategoriesModule,
     ReviewsModule,

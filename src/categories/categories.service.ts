@@ -34,6 +34,7 @@ export class CategoriesService {
       const categories = await this.categoryModel.findAll({
         include: { all: true },
       });
+
       if (!categories?.length) {
         throw new NotFoundException('categories not found');
       }
@@ -52,6 +53,7 @@ export class CategoriesService {
       const categories = await this.categoryModel.findByPk(id, {
         include: { all: true },
       });
+
       if (!categories) {
         throw new NotFoundException('Category id not found');
       }

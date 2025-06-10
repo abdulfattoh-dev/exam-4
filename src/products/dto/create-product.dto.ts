@@ -6,27 +6,27 @@ export class CreateProductDto {
   @IsNotEmpty()
   name: string;
 
-  @IsOptional()
   @IsString()
+  @IsOptional()
   description: string;
 
+  @Type(() => Number)
   @IsNumber()
   @IsNotEmpty()
-  @Type(() => Number)
   price: number;
 
+  @Type(() => Number)
   @IsNumber()
   @IsNotEmpty()
-  @Type(() => Number)
   quantity: number;
 
+  @Type(() => Number)
   @IsNumber()
   @IsNotEmpty()
-  @Type(() => Number)
-  category_id: number;
-
-  @IsNumber()
-  @IsNotEmpty()
-  @Type(() => Number)
   seller_id: number;
+
+  @Type(() => Number)
+  @IsNumber()
+  @IsNotEmpty()
+  category_id: number;
 }
